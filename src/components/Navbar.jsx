@@ -63,7 +63,7 @@ const Navbar = ({ loggedIn }) => {
         <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ease-in-out ${
             scrolled 
                 ? 'bg-white/95 backdrop-blur-xl shadow-xl border-b border-gray-100' 
-                : 'bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 dark:from-blue-950 dark:via-blue-900 dark:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out border-b border-blue-800/20 hover:border-blue-700/30'
+                : 'bg-gradient-to-r from-green-900 via-green-800 to-green-700 dark:from-green-950 dark:via-green-900 dark:to-green-800 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out border-b border-green-800/20 hover:border-green-700/30'
         }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
@@ -72,13 +72,13 @@ const Navbar = ({ loggedIn }) => {
                         <Link 
                             to="/" 
                             className={`flex items-center space-x-3 group transition-all duration-300 ${
-                                scrolled ? 'text-blue-700' : 'text-white'
+                                scrolled ? 'text-green-700' : 'text-white'
                             }`}
                         >
                             <svg 
                                 xmlns="http://www.w3.org/2000/svg" 
                                 className={`h-9 w-9 transition-all duration-300 group-hover:rotate-6 group-hover:scale-110 ${
-                                    scrolled ? 'text-blue-600' : 'text-white/90'
+                                    scrolled ? 'text-green-600' : 'text-white/90'
                                 }`} 
                                 viewBox="0 0 20 20" 
                                 fill="currentColor"
@@ -100,8 +100,8 @@ const Navbar = ({ loggedIn }) => {
                                 to="/" 
                                 className={`px-3 py-2 rounded-lg text-sm font-medium tracking-wide transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md ${
                                     scrolled 
-                                        ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 hover:shadow-blue-100' 
-                                        : 'text-blue-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
+                                        ? 'text-gray-700 hover:text-green-600 hover:bg-green-50 hover:shadow-green-100' 
+                                        : 'text-green-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
                                 }`}
                             >
                                 Home
@@ -113,8 +113,8 @@ const Navbar = ({ loggedIn }) => {
                                         to="/login" 
                                         className={`px-3 py-2 rounded-lg text-sm font-medium tracking-wide transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md ${
                                             scrolled 
-                                                ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 hover:shadow-blue-100' 
-                                                : 'text-blue-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
+                                                ? 'text-gray-700 hover:text-green-600 hover:bg-green-50 hover:shadow-green-100' 
+                                                : 'text-green-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
                                         }`}
                                     >
                                         Login
@@ -123,8 +123,8 @@ const Navbar = ({ loggedIn }) => {
                                         to="/register" 
                                         className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 ${
                                             scrolled
-                                                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg'
-                                                : 'bg-white text-blue-600 hover:bg-blue-50 shadow-md hover:shadow-lg'
+                                                ? 'bg-green-600 text-white hover:bg-green-700 shadow-md hover:shadow-lg'
+                                                : 'bg-white text-green-600 hover:bg-green-50 shadow-md hover:shadow-lg'
                                         }`}
                                     >
                                         Register
@@ -136,8 +136,8 @@ const Navbar = ({ loggedIn }) => {
                                         to="/jobs" 
                                         className={`px-3 py-2 rounded-lg text-sm font-medium tracking-wide transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md ${
                                             scrolled 
-                                                ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 hover:shadow-blue-100' 
-                                                : 'text-blue-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
+                                                ? 'text-gray-700 hover:text-green-600 hover:bg-green-50 hover:shadow-green-100' 
+                                                : 'text-green-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
                                         }`}
                                     >
                                         Jobs
@@ -146,8 +146,8 @@ const Navbar = ({ loggedIn }) => {
                                         to="/userapplications" 
                                         className={`px-3 py-2 rounded-lg text-sm font-medium tracking-wide transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md ${
                                             scrolled 
-                                                ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 hover:shadow-blue-100' 
-                                                : 'text-blue-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
+                                                ? 'text-gray-700 hover:text-green-600 hover:bg-green-50 hover:shadow-green-100' 
+                                                : 'text-green-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
                                         }`}
                                     >
                                         Your Applications
@@ -156,8 +156,8 @@ const Navbar = ({ loggedIn }) => {
                                         to="/skillsassessment" 
                                         className={`px-3 py-2 rounded-lg text-sm font-medium tracking-wide transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md ${
                                             scrolled 
-                                                ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 hover:shadow-blue-100' 
-                                                : 'text-blue-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
+                                                ? 'text-gray-700 hover:text-green-600 hover:bg-green-50 hover:shadow-green-100' 
+                                                : 'text-green-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
                                         }`}
                                     >
                                         Skills Assesment
@@ -166,8 +166,8 @@ const Navbar = ({ loggedIn }) => {
                                         to="/forum" 
                                         className={`px-3 py-2 rounded-lg text-sm font-medium tracking-wide transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md ${
                                             scrolled 
-                                                ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 hover:shadow-blue-100' 
-                                                : 'text-blue-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
+                                                ? 'text-gray-700 hover:text-green-600 hover:bg-green-50 hover:shadow-green-100' 
+                                                : 'text-green-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
                                         }`}
                                     >
                                         Forums
@@ -193,8 +193,8 @@ const Navbar = ({ loggedIn }) => {
                             onClick={toggleMobileMenu}
                             className={`inline-flex items-center justify-center p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                                 scrolled 
-                                    ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-blue-500' 
-                                    : 'text-white hover:bg-blue-500/50 focus:ring-white'
+                                    ? 'text-gray-700 hover:text-green-600 hover:bg-green-50 focus:ring-green-500' 
+                                    : 'text-white hover:bg-green-500/50 focus:ring-white'
                             }`}
                             aria-expanded={mobileMenuOpen}
                             aria-label="Toggle mobile menu"
@@ -231,13 +231,13 @@ const Navbar = ({ loggedIn }) => {
                 <div className={`px-2 pt-2 pb-3 space-y-1 sm:px-3 shadow-lg ${
                     scrolled 
                         ? 'bg-white border-t border-gray-200' 
-                        : 'bg-gradient-to-b from-blue-700/95 to-blue-800/95 shadow-xl'
+                        : 'bg-gradient-to-b from-green-700/95 to-green-800/95 shadow-xl'
                 }`}>
                     <Link 
                         to="/" 
                         className={`block px-3 py-2 rounded-lg text-base font-medium transition-all duration-300 ease-in-out hover:translate-x-2 ${
                             scrolled 
-                                ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
+                                ? 'text-gray-700 hover:text-green-600 hover:bg-green-50' 
                                 : 'text-white hover:bg-white/20'
                         }`}
                         onClick={() => setMobileMenuOpen(false)}
@@ -251,7 +251,7 @@ const Navbar = ({ loggedIn }) => {
                                 to="/login" 
                                 className={`block px-3 py-2 rounded-lg text-base font-medium transition-all duration-300 ease-in-out hover:translate-x-2 ${
                                     scrolled 
-                                        ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
+                                        ? 'text-gray-700 hover:text-green-600 hover:bg-green-50' 
                                         : 'text-white hover:bg-white/20'
                                 }`}
                                 onClick={() => setMobileMenuOpen(false)}
@@ -262,8 +262,8 @@ const Navbar = ({ loggedIn }) => {
                                 to="/register" 
                                 className={`block px-3 py-2 rounded-lg text-base font-semibold transition-all duration-300 ease-in-out hover:translate-x-2 ${
                                     scrolled
-                                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                        : 'bg-white text-blue-600 hover:bg-blue-50'
+                                        ? 'bg-green-600 text-white hover:bg-green-700'
+                                        : 'bg-white text-green-600 hover:bg-green-50'
                                 }`}
                                 onClick={() => setMobileMenuOpen(false)}
                             >
@@ -276,7 +276,7 @@ const Navbar = ({ loggedIn }) => {
                                 to="/jobs" 
                                 className={`block px-3 py-2 rounded-lg text-base font-medium transition-all duration-300 ease-in-out hover:translate-x-2 ${
                                     scrolled 
-                                        ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
+                                        ? 'text-gray-700 hover:text-green-600 hover:bg-green-50' 
                                         : 'text-white hover:bg-white/20'
                                 }`}
                                 onClick={() => setMobileMenuOpen(false)}
@@ -287,7 +287,7 @@ const Navbar = ({ loggedIn }) => {
                                 to="/userapplications" 
                                 className={`block px-3 py-2 rounded-lg text-base font-medium transition-all duration-300 ease-in-out hover:translate-x-2 ${
                                     scrolled 
-                                        ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
+                                        ? 'text-gray-700 hover:text-green-600 hover:bg-green-50' 
                                         : 'text-white hover:bg-white/20'
                                 }`}
                                 onClick={() => setMobileMenuOpen(false)}

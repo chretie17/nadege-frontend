@@ -302,12 +302,12 @@ const CommunityPost = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-8 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-b from-green-50 to-white py-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 <div className="bg-white rounded-xl shadow-xl p-6 mb-8 border border-gray-100">
                     <div className="flex justify-between items-center mb-8">
-                        <h1 className="text-3xl font-bold text-blue-800">
-                            <span className="border-b-4 border-blue-500 pb-1">Community Hub</span>
+                        <h1 className="text-3xl font-bold text-green-800">
+                            <span className="border-b-4 border-green-500 pb-1">Community Hub</span>
                         </h1>
                         <div className="hidden md:flex space-x-2">
                             <div className="flex items-center text-gray-600">
@@ -333,7 +333,7 @@ const CommunityPost = () => {
                                 setActiveTab('forums');
                                 setCurrentTopic(null);
                             }}
-                            className={`py-3 px-6 font-medium text-sm mr-4 transition-colors duration-200 ${activeTab === 'forums' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`py-3 px-6 font-medium text-sm mr-4 transition-colors duration-200 ${activeTab === 'forums' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                             <div className="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -348,7 +348,7 @@ const CommunityPost = () => {
                                 setActiveTab('success-stories');
                                 setCurrentTopic(null);
                             }}
-                            className={`py-3 px-6 font-medium text-sm transition-colors duration-200 ${activeTab === 'success-stories' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`py-3 px-6 font-medium text-sm transition-colors duration-200 ${activeTab === 'success-stories' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                             <div className="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -361,8 +361,8 @@ const CommunityPost = () => {
 
                     {loading ? (
                         <div className="flex flex-col justify-center items-center py-20">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-                            <p className="text-blue-600 mt-4 font-medium">Loading community content...</p>
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+                            <p className="text-green-600 mt-4 font-medium">Loading community content...</p>
                         </div>
                     ) : (
                         <>
@@ -372,7 +372,7 @@ const CommunityPost = () => {
                                     <div className="mb-6">
                                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 mb-6">
                                             <div>
-                                                <h2 className="text-xl font-semibold text-blue-800 mb-2">Community Discussion Forums</h2>
+                                                <h2 className="text-xl font-semibold text-green-800 mb-2">Community Discussion Forums</h2>
                                                 <p className="text-gray-600">Connect with others, share insights, and learn from community experiences</p>
                                             </div>
                                             <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
@@ -380,7 +380,7 @@ const CommunityPost = () => {
                                                     <input
                                                         type="text"
                                                         placeholder="Search topics..."
-                                                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-64"
+                                                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 w-full sm:w-64"
                                                         value={searchTerm}
                                                         onChange={(e) => setSearchTerm(e.target.value)}
                                                     />
@@ -392,7 +392,7 @@ const CommunityPost = () => {
                                                     variant="contained" 
                                                     color="primary"
                                                     onClick={() => setOpenNewTopicDialog(true)}
-                                                    className="bg-blue-600 hover:bg-blue-700 shadow-md"
+                                                    className="bg-green-600 hover:bg-green-700 shadow-md"
                                                     style={{ textTransform: 'none', padding: '8px 16px' }}
                                                 >
                                                     <div className="flex items-center">
@@ -407,7 +407,7 @@ const CommunityPost = () => {
                                         
                                         {topicsToShow.length === 0 ? (
                                             <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-200">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                                 </svg>
                                                 <h3 className="text-xl font-bold mb-2 text-gray-800">{searchTerm ? 'No matching topics found' : 'No topics yet'}</h3>
@@ -417,7 +417,7 @@ const CommunityPost = () => {
                                                 {searchTerm ? (
                                                     <button 
                                                         onClick={() => setSearchTerm('')}
-                                                        className="bg-white text-blue-600 border border-blue-300 hover:bg-blue-50 font-medium py-2 px-4 rounded-lg transition-colors mr-3"
+                                                        className="bg-white text-green-600 border border-green-300 hover:bg-green-50 font-medium py-2 px-4 rounded-lg transition-colors mr-3"
                                                     >
                                                         Clear Search
                                                     </button>
@@ -426,7 +426,7 @@ const CommunityPost = () => {
                                                         variant="contained" 
                                                         color="primary"
                                                         onClick={() => setOpenNewTopicDialog(true)}
-                                                        className="bg-blue-600 hover:bg-blue-700"
+                                                        className="bg-green-600 hover:bg-green-700"
                                                     >
                                                         Create New Topic
                                                     </Button>
@@ -455,7 +455,7 @@ const CommunityPost = () => {
                                                         {topicsToShow.map(topic => (
                                                             <tr 
                                                                 key={topic.id} 
-                                                                className="hover:bg-blue-50 cursor-pointer transition-colors"
+                                                                className="hover:bg-green-50 cursor-pointer transition-colors"
                                                                 onClick={() => {
                                                                     setCurrentTopic(null); // Clear first to avoid showing old topic data
                                                                     axios.get(`${API_URL}/forum/topics/${topic.id}`)
@@ -479,12 +479,12 @@ const CommunityPost = () => {
                                                                 }}
                                                             >
                                                                 <td className="px-6 py-4">
-                                                                    <div className="text-blue-600 font-medium text-base">{topic.title}</div>
+                                                                    <div className="text-green-600 font-medium text-base">{topic.title}</div>
                                                                     {topic.description && <div className="text-gray-500 mt-1 text-sm line-clamp-1">{topic.description}</div>}
                                                                 </td>
                                                                 <td className="px-6 py-4">
                                                                     <div className="flex items-center">
-                                                                        <div className="bg-blue-100 text-blue-800 rounded-full w-8 h-8 flex items-center justify-center font-medium mr-2">
+                                                                        <div className="bg-green-100 text-green-800 rounded-full w-8 h-8 flex items-center justify-center font-medium mr-2">
                                                                             {topic.creator_name.charAt(0).toUpperCase()}
                                                                         </div>
                                                                         <div className="text-gray-700">{topic.creator_name}</div>
@@ -517,12 +517,12 @@ const CommunityPost = () => {
                                     {/* Selected Topic with Posts */}
                                     {currentTopic && (
                                         <div className="mt-10 border-t pt-8">
-                                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl mb-6 shadow-sm border border-blue-100">
-                                                <h2 className="text-2xl font-bold text-blue-800 mb-2">{currentTopic.title}</h2>
-                                                {currentTopic.description && <p className="text-blue-700 mb-4">{currentTopic.description}</p>}
+                                            <div className="bg-gradient-to-r from-green-50 to-indigo-50 p-6 rounded-xl mb-6 shadow-sm border border-green-100">
+                                                <h2 className="text-2xl font-bold text-green-800 mb-2">{currentTopic.title}</h2>
+                                                {currentTopic.description && <p className="text-green-700 mb-4">{currentTopic.description}</p>}
                                                 <div className="flex items-center text-gray-600">
                                                     <div className="flex items-center">
-                                                        <div className="bg-blue-100 text-blue-800 rounded-full w-8 h-8 flex items-center justify-center font-medium mr-2">{currentTopic.creator_name?.charAt(0).toUpperCase()}
+                                                        <div className="bg-green-100 text-green-800 rounded-full w-8 h-8 flex items-center justify-center font-medium mr-2">{currentTopic.creator_name?.charAt(0).toUpperCase()}
                                                         </div>
                                                         <span className="mr-2">Started by <span className="font-medium">{currentTopic.creator_name}</span></span>
                                                     </div>
@@ -541,7 +541,7 @@ const CommunityPost = () => {
                                                     variant="contained" 
                                                     color="primary"
                                                     onClick={() => setOpenNewPostDialog(true)}
-                                                    className="bg-blue-600 hover:bg-blue-700 shadow-md"
+                                                    className="bg-green-600 hover:bg-green-700 shadow-md"
                                                     style={{ textTransform: 'none', padding: '10px 20px' }}
                                                 >
                                                     <div className="flex items-center">
@@ -559,7 +559,7 @@ const CommunityPost = () => {
                                                             setCurrentTopic(null); 
                                                             window.scrollTo({ top: 0, behavior: 'smooth' });
                                                         }}
-                                                        className="text-blue-600 hover:text-blue-800 flex items-center transition-colors"
+                                                        className="text-green-600 hover:text-green-800 flex items-center transition-colors"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
@@ -572,16 +572,16 @@ const CommunityPost = () => {
                                             {currentTopic.posts && currentTopic.posts.length > 0 ? (
                                                 <div className="space-y-6">
                                                     {currentTopic.posts.map((post, index) => (
-                                                        <div key={post.id} className={`rounded-xl overflow-hidden shadow-sm ${index === 0 ? 'border-2 border-blue-300 bg-blue-50' : 'border border-gray-200 bg-white'}`}>
+                                                        <div key={post.id} className={`rounded-xl overflow-hidden shadow-sm ${index === 0 ? 'border-2 border-green-300 bg-green-50' : 'border border-gray-200 bg-white'}`}>
                                                             <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
                                                                 <div className="flex items-center">
-                                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-medium mr-3 ${index === 0 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-medium mr-3 ${index === 0 ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
                                                                         {post.user_name?.charAt(0).toUpperCase()}
                                                                     </div>
                                                                     <div>
                                                                         <span className="font-medium text-gray-800">{post.user_name}</span>
                                                                         {index === 0 && (
-                                                                            <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                                                            <span className="ml-2 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
                                                                                 Topic Starter
                                                                             </span>
                                                                         )}
@@ -601,7 +601,7 @@ const CommunityPost = () => {
                                                                 <div className="flex items-center space-x-6 border-t pt-4 mt-4">
                                                                     <button 
                                                                         className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors ${post.userLiked 
-                                                                            ? 'bg-blue-100 text-blue-700' 
+                                                                            ? 'bg-green-100 text-green-700' 
                                                                             : 'text-gray-600 hover:bg-gray-100'}`}
                                                                         onClick={() => handleLikePost(post.id, 'like')}
                                                                         disabled={post.userLiked || post.userDisliked}
@@ -625,7 +625,7 @@ const CommunityPost = () => {
                                                                     </button>
                                                                     <div className="ml-auto">
                                                                         {post.userLiked && 
-                                                                            <span className="text-blue-600 text-sm italic">You liked this post</span>
+                                                                            <span className="text-green-600 text-sm italic">You liked this post</span>
                                                                         }
                                                                         {post.userDisliked && 
                                                                             <span className="text-red-600 text-sm italic">You disliked this post</span>
@@ -647,7 +647,7 @@ const CommunityPost = () => {
                                                         variant="contained" 
                                                         color="primary"
                                                         onClick={() => setOpenNewPostDialog(true)}
-                                                        className="bg-blue-600 hover:bg-blue-700 shadow-md"
+                                                        className="bg-green-600 hover:bg-green-700 shadow-md"
                                                     >
                                                         Post Reply
                                                     </Button>
@@ -661,7 +661,7 @@ const CommunityPost = () => {
                                                         variant="contained" 
                                                         color="primary"
                                                         onClick={() => setOpenNewPostDialog(true)}
-                                                        className="bg-blue-600 hover:bg-blue-700 shadow-md"
+                                                        className="bg-green-600 hover:bg-green-700 shadow-md"
                                                         style={{ textTransform: 'none', padding: '10px 24px' }}
                                                     >
                                                         <div className="flex items-center">
@@ -682,14 +682,14 @@ const CommunityPost = () => {
                                 <div>
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 mb-8">
                                         <div>
-                                            <h2 className="text-xl font-semibold text-blue-800 mb-2">Success Stories</h2>
+                                            <h2 className="text-xl font-semibold text-green-800 mb-2">Success Stories</h2>
                                             <p className="text-gray-600">Read inspiring stories from community members who have achieved their goals</p>
                                         </div>
                                         <Button 
                                             variant="contained" 
                                             color="primary"
                                             onClick={() => setOpenNewStoryDialog(true)}
-                                            className="bg-blue-600 hover:bg-blue-700 shadow-md"
+                                            className="bg-green-600 hover:bg-green-700 shadow-md"
                                             style={{ textTransform: 'none', padding: '8px 16px' }}
                                         >
                                             <div className="flex items-center">
@@ -703,7 +703,7 @@ const CommunityPost = () => {
                                     
                                     {successStories.length === 0 ? (
                                         <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-200">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                             </svg>
                                             <h3 className="text-xl font-bold mb-2 text-gray-800">No success stories yet</h3>
@@ -714,7 +714,7 @@ const CommunityPost = () => {
                                                 variant="contained" 
                                                 color="primary"
                                                 onClick={() => setOpenNewStoryDialog(true)}
-                                                className="bg-blue-600 hover:bg-blue-700 shadow-md"
+                                                className="bg-green-600 hover:bg-green-700 shadow-md"
                                             >
                                                 Share Your Story
                                             </Button>
@@ -725,11 +725,11 @@ const CommunityPost = () => {
                                                 <div key={story.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                                                     <div className="p-6">
                                                         <div className="flex items-center mb-4">
-                                                            <div className="bg-blue-100 text-blue-800 rounded-full w-10 h-10 flex items-center justify-center font-medium mr-3">
+                                                            <div className="bg-green-100 text-green-800 rounded-full w-10 h-10 flex items-center justify-center font-medium mr-3">
                                                                 {story.author_name.charAt(0).toUpperCase()}
                                                             </div>
                                                             <div>
-                                                                <h3 className="text-lg font-semibold text-blue-800">{story.title}</h3>
+                                                                <h3 className="text-lg font-semibold text-green-800">{story.title}</h3>
                                                                 <div className="flex items-center text-gray-600 text-sm mt-1">
                                                                     <span>{story.author_name}</span>
                                                                     <span className="mx-2">•</span>
@@ -744,14 +744,14 @@ const CommunityPost = () => {
                                                             }
                                                         </div>
                                                         <div className="flex items-center justify-between border-t pt-4">
-                                                            <div className="flex items-center text-blue-600">
+                                                            <div className="flex items-center text-green-600">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                                 </svg>
                                                                 <span className="font-medium">Success Story</span>
                                                             </div>
                                                             {story.content.length > 300 && (
-                                                                <button className="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                                                <button className="text-green-600 hover:text-green-800 font-medium text-sm">
                                                                     Read More
                                                                 </button>
                                                             )}
@@ -779,7 +779,7 @@ const CommunityPost = () => {
                 }}
             >
                 <DialogTitle>
-                    <div className="flex items-center text-blue-800">
+                    <div className="flex items-center text-green-800">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
@@ -787,7 +787,7 @@ const CommunityPost = () => {
                     </div>
                 </DialogTitle>
                 <DialogContent>
-                    <div className="bg-blue-50 p-4 rounded-lg mb-4 text-blue-700 text-sm">
+                    <div className="bg-green-50 p-4 rounded-lg mb-4 text-green-700 text-sm">
                         <p>Start a conversation by creating a new topic. Clear and descriptive titles help others find and join your discussion.</p>
                     </div>
                     <TextField
@@ -836,7 +836,7 @@ const CommunityPost = () => {
                         onClick={handleCreateTopic} 
                         variant="contained" 
                         color="primary"
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-green-600 hover:bg-green-700"
                         style={{ 
                             textTransform: 'none',
                             borderRadius: '0.5rem',
@@ -859,7 +859,7 @@ const CommunityPost = () => {
                 }}
             >
                 <DialogTitle>
-                    <div className="flex items-center text-blue-800">
+                    <div className="flex items-center text-green-800">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                         </svg>
@@ -900,7 +900,7 @@ const CommunityPost = () => {
                         onClick={handleCreatePost}
                         variant="contained" 
                         color="primary"
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-green-600 hover:bg-green-700"
                         style={{ 
                             textTransform: 'none',
                             borderRadius: '0.5rem',
@@ -923,7 +923,7 @@ const CommunityPost = () => {
                 }}
             >
                 <DialogTitle>
-                    <div className="flex items-center text-blue-800">
+                    <div className="flex items-center text-green-800">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                         </svg>
@@ -931,12 +931,12 @@ const CommunityPost = () => {
                     </div>
                 </DialogTitle>
                 <DialogContent>
-                    <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="mb-4 p-4 bg-green-50 rounded-lg border border-green-100">
                         <div className="flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600 mt-0.5 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                             </svg>
-                            <p className="text-blue-700 text-sm">
+                            <p className="text-green-700 text-sm">
                                 Your story will be reviewed by our team before being published. Share your experience to inspire others in the community!
                             </p>
                         </div></div>
@@ -979,7 +979,7 @@ const CommunityPost = () => {
                             id="anonymous"
                             checked={isAnonymous}
                             onChange={(e) => setIsAnonymous(e.target.checked)}
-                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                            className="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
                         />
                         <label htmlFor="anonymous" className="ml-2 text-gray-700">
                             Post anonymously
@@ -1001,7 +1001,7 @@ const CommunityPost = () => {
                         onClick={handleSubmitStory}
                         variant="contained" 
                         color="primary"
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-green-600 hover:bg-green-700"
                         style={{ 
                             textTransform: 'none',
                             borderRadius: '0.5rem',

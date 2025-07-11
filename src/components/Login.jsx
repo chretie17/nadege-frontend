@@ -54,9 +54,9 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex bg-gradient-to-br from-green-50 via-blue-50 to-green-50">
+        <div className="min-h-screen flex bg-gradient-to-br from-green-50 via-green-50 to-green-50">
             {/* Left side - MedConnect Rwanda description */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 to-blue-700 text-white p-12 relative overflow-hidden">
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 to-green-700 text-white p-12 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full opacity-10">
                     <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                         <path d="M0,0 L100,0 L100,100 L0,100 Z" fill="none" stroke="white" strokeWidth="0.5" />
@@ -213,7 +213,7 @@ const Login = () => {
                                     className={`w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg text-white font-medium text-sm
                                         ${isLoading 
                                             ? 'bg-green-400 cursor-not-allowed' 
-                                            : 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-md hover:shadow-lg transition-all duration-300'
+                                            : 'bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 shadow-md hover:shadow-lg transition-all duration-300'
                                         }`}
                                 >
                                     {isLoading ? (

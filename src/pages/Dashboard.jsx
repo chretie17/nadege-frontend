@@ -71,7 +71,7 @@ const Dashboard = () => {
     purple: '#8b5cf6',
     pink: '#ec4899',
     indigo: '#6366f1',
-    blue: '#3b82f6',
+    green: '#3b82f6',
     teal: '#14b8a6',
     emerald: '#10b981',
     amber: '#f59e0b',
@@ -259,7 +259,7 @@ const Dashboard = () => {
           <div className="bg-white overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl">
             <div className="p-5">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
                   <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
@@ -272,7 +272,7 @@ const Dashboard = () => {
                         {dashboardStats?.applicationStats?.successRate || 0}%
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5 ml-2">
-                        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${dashboardStats?.applicationStats?.successRate || 0}%` }}></div>
+                        <div className="bg-green-600 h-2.5 rounded-full" style={{ width: `${dashboardStats?.applicationStats?.successRate || 0}%` }}></div>
                       </div>
                     </dd>
                   </dl>
@@ -281,7 +281,7 @@ const Dashboard = () => {
             </div>
             <div className="bg-gray-50 px-5 py-3">
               <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                <a href="#" className="font-medium text-green-600 hover:text-green-500">
                   {formatNumber(dashboardStats?.applicationStats?.acceptedApplications)} accepted applications
                 </a>
               </div>
@@ -408,7 +408,7 @@ const Dashboard = () => {
                       {skillsDistribution.map((entry, index) => (
                         <Cell 
                           key={`cell-${index}`} 
-                          fill={index % 2 === 0 ? CHART_COLORS.indigo : CHART_COLORS.blue} 
+                          fill={index % 2 === 0 ? CHART_COLORS.indigo : CHART_COLORS.green} 
                         />
                       ))}
                     </Bar>

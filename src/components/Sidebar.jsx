@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Briefcase,
   FileText,
+  MessageCircle,
   Search,
   Zap,
   Target,
@@ -94,7 +95,7 @@ const Sidebar = () => {
                 },
                 {
                     path: '/chat',
-                    icon: Briefcase,
+                    icon: MessageCircle,
                     label: 'Chat',
                     roles: ['admin']
                 },
@@ -111,7 +112,7 @@ const Sidebar = () => {
             items.push(
                {
                     path: '/chat',
-                    icon: Briefcase,
+                    icon: MessageCircle,
                     label: 'Chat',
                     roles: ['doctor']
                 },

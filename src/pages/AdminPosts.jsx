@@ -432,7 +432,7 @@ const AdminContentManagement = () => {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-800">
-                <span className="border-b-4 border-blue-500 pb-1">Manage Forum</span>
+                <span className="border-b-4 border-green-500 pb-1">Manage Forum</span>
               </h1>
               <p className="text-gray-600 mt-2">Manage community content and user interactions</p>
             </div>
@@ -467,7 +467,7 @@ const AdminContentManagement = () => {
               <Tab 
                 label={
                   <div className="flex items-center">
-                    <ForumIcon className="mr-2 text-blue-500" fontSize="small" />
+                    <ForumIcon className="mr-2 text-green-500" fontSize="small" />
                     <span>Forum Management</span>
                     {flaggedContent.length > 0 && (
                       <Badge 
@@ -587,7 +587,7 @@ const AdminContentManagement = () => {
                               </TableCell>
                               <TableCell>
                                 <div className="flex items-center">
-                                  <div className="bg-blue-100 text-blue-800 rounded-full w-8 h-8 flex items-center justify-center font-medium mr-2">
+                                  <div className="bg-green-100 text-green-800 rounded-full w-8 h-8 flex items-center justify-center font-medium mr-2">
                                     {story.author_name.charAt(0).toUpperCase()}
                                   </div>
                                   <Typography variant="body2">
@@ -692,7 +692,7 @@ const AdminContentManagement = () => {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center">
-                              <div className="bg-blue-100 text-blue-800 rounded-full w-8 h-8 flex items-center justify-center font-medium mr-2">
+                              <div className="bg-green-100 text-green-800 rounded-full w-8 h-8 flex items-center justify-center font-medium mr-2">
                                 {story.author_name.charAt(0).toUpperCase()}
                               </div>
                               <Typography variant="body2">
@@ -843,7 +843,7 @@ const AdminContentManagement = () => {
                               <TableCell>
                                 <Typography 
                                   variant="subtitle2" 
-                                  className="font-semibold text-gray-800 cursor-pointer hover:text-blue-600"
+                                  className="font-semibold text-gray-800 cursor-pointer hover:text-green-600"
                                   onClick={() => handleLoadTopicPosts(topic.id)}
                                 >
                                   {topic.is_pinned && (
@@ -862,7 +862,7 @@ const AdminContentManagement = () => {
                               </TableCell>
                               <TableCell>
                                 <div className="flex items-center">
-                                  <div className="bg-blue-100 text-blue-800 rounded-full w-8 h-8 flex items-center justify-center font-medium mr-2">
+                                  <div className="bg-green-100 text-green-800 rounded-full w-8 h-8 flex items-center justify-center font-medium mr-2">
                                     {topic.creator_name.charAt(0).toUpperCase()}
                                   </div>
                                   <Typography variant="body2">
@@ -948,8 +948,8 @@ const AdminContentManagement = () => {
                 </div>
               ) : (
                 <>
-                  <div className="bg-blue-50 p-4 rounded-lg mb-4 border border-blue-100">
-                    <Typography variant="subtitle1" className="flex items-center text-blue-800 font-semibold">
+                  <div className="bg-green-50 p-4 rounded-lg mb-4 border border-green-100">
+                    <Typography variant="subtitle1" className="flex items-center text-green-800 font-semibold">
                       <ArrowUpward fontSize="small" className="mr-2" />
                       Viewing posts for topic: {forumTopics.find(t => t.id === selectedTopic)?.title}
                     </Typography>
@@ -1162,7 +1162,7 @@ const AdminContentManagement = () => {
         }}
       >
         <DialogTitle>
-          <div className="flex items-center text-blue-800">
+          <div className="flex items-center text-green-800">
             <Edit className="mr-2" />
             Edit Success Story
           </div>
@@ -1226,7 +1226,7 @@ const AdminContentManagement = () => {
             onClick={handleSaveStoryEdit}
             variant="contained" 
             color="primary"
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-green-600 hover:bg-green-700"
             style={{ 
               textTransform: 'none',
               borderRadius: '0.5rem',
@@ -1249,7 +1249,7 @@ const AdminContentManagement = () => {
         }}
       >
         <DialogTitle>
-          <div className="flex items-center text-blue-800">
+          <div className="flex items-center text-green-800">
             <Edit className="mr-2" />
             Edit Post
           </div>
@@ -1288,7 +1288,7 @@ const AdminContentManagement = () => {
             onClick={handleSavePostEdit}
             variant="contained" 
             color="primary"
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-green-600 hover:bg-green-700"
             style={{ 
               textTransform: 'none',
               borderRadius: '0.5rem',

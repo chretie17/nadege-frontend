@@ -57,7 +57,7 @@ const Reports = () => {
     // Add logo (simulated with text for simplicity)
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(24);
-    pdf.setTextColor(30, 64, 175); // Dark blue
+    pdf.setTextColor(30, 64, 175); // Dark green
     pdf.text('EmpowerLink', margin, 60);
     
     // Add horizontal line
@@ -155,7 +155,7 @@ const Reports = () => {
 const addSectionTitle = (pdf, title, margin, yPos) => {
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(14);
-  pdf.setTextColor(30, 64, 175); // Dark blue
+  pdf.setTextColor(30, 64, 175); // Dark green
   pdf.text(title, margin, yPos);
   return yPos + 20;
 };
@@ -578,8 +578,8 @@ const addCommunityEngagementContent = (pdf, reportData, margin, startY, pageWidt
           <h3 className="text-lg font-medium text-gray-900 mb-4">Users by Role</h3>
           <div className="grid grid-cols-3 gap-4">
             {usersByRole.map(role => (
-              <div key={role.role} className="bg-blue-50 p-4 rounded-lg text-center">
-                <div className="text-3xl font-bold text-blue-600">{role.count}</div>
+              <div key={role.role} className="bg-green-50 p-4 rounded-lg text-center">
+                <div className="text-3xl font-bold text-green-600">{role.count}</div>
                 <div className="text-gray-600 capitalize">{role.role}s</div>
               </div>
             ))}
@@ -620,7 +620,7 @@ const addCommunityEngagementContent = (pdf, reportData, margin, startY, pageWidt
             {usersBySkillCategory && usersBySkillCategory.map(category => (
               <div key={category.category_name} className="flex justify-between items-center p-3 border rounded-lg">
                 <span>{category.category_name}</span>
-                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full">{category.user_count}</span>
+                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full">{category.user_count}</span>
               </div>
             ))}
           </div>
@@ -803,8 +803,8 @@ const addCommunityEngagementContent = (pdf, reportData, margin, startY, pageWidt
               <div className="text-2xl font-bold text-indigo-600">{forumActivity.total_posts}</div>
               <div className="text-gray-600">Posts</div>
             </div>
-            <div className="p-4 rounded-lg text-center bg-blue-50">
-              <div className="text-2xl font-bold text-blue-600">{forumActivity.active_users}</div>
+            <div className="p-4 rounded-lg text-center bg-green-50">
+              <div className="text-2xl font-bold text-green-600">{forumActivity.active_users}</div>
               <div className="text-gray-600">Active Users</div>
             </div>
           </div>
@@ -860,9 +860,9 @@ const addCommunityEngagementContent = (pdf, reportData, margin, startY, pageWidt
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {/* Page Header */}
-          <div className="bg-blue-900 px-6 py-4 text-white">
+          <div className="bg-green-900 px-6 py-4 text-white">
           <h1 className="text-2xl font-bold">EmpowerLink Reports</h1>
-            <p className="text-blue-100">System analytics and performance metrics</p>
+            <p className="text-green-100">System analytics and performance metrics</p>
           </div>
           
           {/* Filters */}
@@ -902,7 +902,7 @@ const addCommunityEngagementContent = (pdf, reportData, margin, startY, pageWidt
               <div className="flex space-x-2">
                 <button 
                   onClick={handleApplyFilters}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                  className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
                 >
                   Apply
                 </button>
@@ -950,7 +950,7 @@ const addCommunityEngagementContent = (pdf, reportData, margin, startY, pageWidt
               <button
                 onClick={() => setActiveTab('user-overview')}
                 className={`px-4 py-2 rounded-md ${activeTab === 'user-overview' 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-green-600 text-white' 
                   : 'text-gray-700 hover:bg-gray-100'}`}
               >
                 User Overview
@@ -959,7 +959,7 @@ const addCommunityEngagementContent = (pdf, reportData, margin, startY, pageWidt
               <button
                 onClick={() => setActiveTab('job-market')}
                 className={`px-4 py-2 rounded-md ${activeTab === 'job-market' 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-green-600 text-white' 
                   : 'text-gray-700 hover:bg-gray-100'}`}
               >
                 Job Market
@@ -968,7 +968,7 @@ const addCommunityEngagementContent = (pdf, reportData, margin, startY, pageWidt
               <button
                 onClick={() => setActiveTab('skills-assessment')}
                 className={`px-4 py-2 rounded-md ${activeTab === 'skills-assessment' 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-green-600 text-white' 
                   : 'text-gray-700 hover:bg-gray-100'}`}
               >
                 Skills Assessment
@@ -977,7 +977,7 @@ const addCommunityEngagementContent = (pdf, reportData, margin, startY, pageWidt
               <button
                 onClick={() => setActiveTab('community-engagement')}
                 className={`px-4 py-2 rounded-md ${activeTab === 'community-engagement' 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-green-600 text-white' 
                   : 'text-gray-700 hover:bg-gray-100'}`}
               >
                 Community Engagement
@@ -1007,7 +1007,7 @@ const addCommunityEngagementContent = (pdf, reportData, margin, startY, pageWidt
             
             {loading ? (
               <div className="py-12 flex justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
               </div>
             ) : (
               renderReport()

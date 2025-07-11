@@ -59,7 +59,7 @@ const ManageUsers = () => {
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="max-w-7xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden">
-            <div className="bg-blue-900 px-6 py-4 text-white">
+            <div className="bg-green-900 px-6 py-4 text-white">
             <h1 className="text-4xl font-extrabold text-white tracking-wide">Manage Users</h1>
                 </div>
 
@@ -83,61 +83,61 @@ const ManageUsers = () => {
                                 <input 
                                     type="text" 
                                     placeholder="Username" 
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                                     value={userForm.username} 
                                     onChange={(e) => setUserForm({ ...userForm, username: e.target.value })} 
                                 />
                                 <input 
                                     type="text" 
                                     placeholder="Name" 
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                                     value={userForm.name} 
                                     onChange={(e) => setUserForm({ ...userForm, name: e.target.value })} 
                                 />
                                 <input 
                                     type="email" 
                                     placeholder="Email" 
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                                     value={userForm.email} 
                                     onChange={(e) => setUserForm({ ...userForm, email: e.target.value })} 
                                 />
                                 <input 
                                     type="text" 
                                     placeholder="Phone" 
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                                     value={userForm.phone} 
                                     onChange={(e) => setUserForm({ ...userForm, phone: e.target.value })} 
                                 />
                                 <input 
                                     type="text" 
                                     placeholder="Address" 
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                                     value={userForm.address} 
                                     onChange={(e) => setUserForm({ ...userForm, address: e.target.value })} 
                                 />
                                 <input 
                                     type="text" 
                                     placeholder="Skills" 
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                                     value={userForm.skills} 
                                     onChange={(e) => setUserForm({ ...userForm, skills: e.target.value })} 
                                 />
                                 <input 
                                     type="text" 
                                     placeholder="Experience" 
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                                     value={userForm.experience} 
                                     onChange={(e) => setUserForm({ ...userForm, experience: e.target.value })} 
                                 />
                                 <input 
                                     type="text" 
                                     placeholder="Education" 
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                                     value={userForm.education} 
                                     onChange={(e) => setUserForm({ ...userForm, education: e.target.value })} 
                                 />
                                 <select 
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                                     value={userForm.role} 
                                     onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}
                                 >
@@ -149,13 +149,13 @@ const ManageUsers = () => {
                                 <input 
                                     type="password" 
                                     placeholder="Password (Leave blank to keep existing)" 
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                                     value={userForm.password} 
                                     onChange={(e) => setUserForm({ ...userForm, password: e.target.value })} 
                                 />
                             </div>
                             <button 
-                                className="mt-6 w-full bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 transition-colors duration-300 font-semibold"
+                                className="mt-6 w-full bg-green-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-600 transition-colors duration-300 font-semibold"
                                 onClick={handleSubmit}
                             >
                                 {editingUser ? 'Update' : 'Add'} User
@@ -192,7 +192,7 @@ const ManageUsers = () => {
     user.role === 'patient' ? 'bg-green-200 text-green-800' : 
     user.role === 'doctor' ? 'bg-yellow-200 text-yellow-800' :
 
-    'bg-blue-200 text-blue-800'}
+    'bg-green-200 text-green-800'}
 `}>
   {user.role}
 </span>
@@ -201,7 +201,7 @@ const ManageUsers = () => {
                                         <td className="py-3 px-6">
                                             <div className="flex items-center space-x-2">
                                                 <button 
-                                                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-300 flex items-center space-x-1"
+                                                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-300 flex items-center space-x-1"
                                                     onClick={() => handleEdit(user)}
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
