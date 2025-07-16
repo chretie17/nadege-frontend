@@ -395,7 +395,7 @@ const CommunicationHub = () => {
 
     if (!currentUserId) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center ">
                 <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
                     <div className="text-center">
                         <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />

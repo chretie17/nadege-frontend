@@ -6,7 +6,7 @@ const ManageUsers = () => {
     const [users, setUsers] = useState([]);
     const [editingUser, setEditingUser] = useState(null);
     const [showForm, setShowForm] = useState(false);
-    const [userForm, setUserForm] = useState({ username: '', name: '', email: '', phone: '', address: '', skills: '', experience: '', education: '', role: 'user', password: '' });
+    const [userForm, setUserForm] = useState({ username: '', name: '', email: '', phone: '', address: '', specialization: '', experience: '', education: '', role: 'user', password: '' });
 
     const fetchUsers = async () => {
         try {
@@ -49,7 +49,7 @@ const ManageUsers = () => {
             }
             fetchUsers();
             setEditingUser(null);
-            setUserForm({ username: '', name: '', email: '', phone: '', address: '', skills: '', experience: '', education: '', role: 'user', password: '' });
+            setUserForm({ username: '', name: '', email: '', phone: '', address: '',specialization: '', experience: '', education: '', role: 'user', password: '' });
             setShowForm(false);
         } catch (error) {
             console.error('Error saving user:', error);
@@ -117,10 +117,10 @@ const ManageUsers = () => {
                                 />
                                 <input 
                                     type="text" 
-                                    placeholder="Skills" 
+                                    placeholder="Specialization" 
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
-                                    value={userForm.skills} 
-                                    onChange={(e) => setUserForm({ ...userForm, skills: e.target.value })} 
+                                    value={userForm.specialization} 
+                                    onChange={(e) => setUserForm({ ...userForm, specialization: e.target.value })} 
                                 />
                                 <input 
                                     type="text" 

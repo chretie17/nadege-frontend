@@ -133,34 +133,14 @@ const Navbar = ({ loggedIn }) => {
                             ) : (
                                 <>
                                     <Link 
-                                        to="/jobs" 
+                                        to="/appointments" 
                                         className={`px-3 py-2 rounded-lg text-sm font-medium tracking-wide transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md ${
                                             scrolled 
                                                 ? 'text-gray-700 hover:text-green-600 hover:bg-green-50 hover:shadow-green-100' 
                                                 : 'text-green-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
                                         }`}
                                     >
-                                        Jobs
-                                    </Link>
-                                    <Link 
-                                        to="/userapplications" 
-                                        className={`px-3 py-2 rounded-lg text-sm font-medium tracking-wide transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md ${
-                                            scrolled 
-                                                ? 'text-gray-700 hover:text-green-600 hover:bg-green-50 hover:shadow-green-100' 
-                                                : 'text-green-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
-                                        }`}
-                                    >
-                                        Your Applications
-                                    </Link>
-                                    <Link 
-                                        to="/skillsassessment" 
-                                        className={`px-3 py-2 rounded-lg text-sm font-medium tracking-wide transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md ${
-                                            scrolled 
-                                                ? 'text-gray-700 hover:text-green-600 hover:bg-green-50 hover:shadow-green-100' 
-                                                : 'text-green-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
-                                        }`}
-                                    >
-                                        Skills Assesment
+                                        Appointments
                                     </Link>
                                     <Link 
                                         to="/forum" 
@@ -170,8 +150,19 @@ const Navbar = ({ loggedIn }) => {
                                                 : 'text-green-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
                                         }`}
                                     >
-                                        Forums
+                                        Forum
                                     </Link>
+                                    <Link 
+                                        to="/chat" 
+                                        className={`px-3 py-2 rounded-lg text-sm font-medium tracking-wide transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md ${
+                                            scrolled 
+                                                ? 'text-gray-700 hover:text-green-600 hover:bg-green-50 hover:shadow-green-100' 
+                                                : 'text-green-100 hover:text-white hover:bg-white/20 hover:shadow-white/20'
+                                        }`}
+                                    >
+                                        Chat
+                                    </Link>
+                                   
                                     <button 
                                         onClick={handleLogout} 
                                         className={`px-4 py-2 rounded-lg text-sm font-medium border-2 transition-all duration-300 ease-in-out transform hover:scale-105 ${

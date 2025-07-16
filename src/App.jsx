@@ -10,8 +10,10 @@ import Dashboard from './pages/Dashboard';
 import ManageUsers from './pages/ManageUsers';
 import CommunityPost from './pages/CommunityPost';
 import AdminContentManagement from './pages/AdminPosts';
+import DoctorDashboard from './pages/DoctorAppointments';
 import Reports from './pages/Report';
 import CommunicationHub from './pages/Chat';
+import PatientDashboard from './pages/PatientAppointment';
 
 const App = () => {
     const [role, setRole] = useState(localStorage.getItem('role'));
@@ -29,7 +31,7 @@ const App = () => {
     return (
         <BrowserRouter>
             {!role && <Navbar />}
-            {(role === 'user') && <Navbar loggedIn />}
+            {(role === 'patient') && <Navbar loggedIn />}
 <div className="flex">
   {/* Sidebar for admin and doctor */}
   {(role === 'admin' || role === 'doctor') && role !== null && <Sidebar />}
@@ -46,6 +48,8 @@ const App = () => {
                         <Route path="/adminforums" element={<AdminContentManagement />} />
                         <Route path="/reports" element={<Reports />} />
                         <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+                        <Route path="/appointments" element={<PatientDashboard />} />
                         <Route path="/manage-users" element={<ManageUsers />} />
                     </Routes>
                 </div>

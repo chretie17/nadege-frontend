@@ -116,6 +116,18 @@ const Sidebar = () => {
                     label: 'Chat',
                     roles: ['doctor']
                 },
+                {
+                    path: '/forum',
+                    icon: MessageSquare,
+                    label: 'Forum',
+                    roles: ['doctor']
+                },
+                {
+                    path: '/doctor-dashboard',
+                    icon: Stethoscope,
+                    label: 'Appointments',
+                    roles: ['doctor']
+                }
             );
         }
 
