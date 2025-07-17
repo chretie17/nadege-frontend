@@ -10,6 +10,7 @@ const DoctorDashboard = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [statusFilter, setStatusFilter] = useState('all');
   const [saving, setSaving] = useState(false);
+  const [showAllDates, setShowAllDates] = useState(false);
 
   // Get current user (doctor) from localStorage
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -27,19 +28,36 @@ const DoctorDashboard = () => {
     { value: 'sunday', label: 'Sunday' }
   ];
 
-  // Fetch doctor's appointments
+  // Fetch doctor's appointments with improved date handling
   const fetchAppointments = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (selectedDate) params.append('date', selectedDate);
-      if (statusFilter !== 'all') params.append('status', statusFilter);
       
-      const response = await fetch(`${API_BASE}/appointments/doctor/${doctorId}?${params}`);
+      // Only add date parameter if we're not showing all dates
+      if (!showAllDates && selectedDate) {
+        params.append('date', selectedDate);
+      }
+      
+      if (statusFilter !== 'all') {
+        params.append('status', statusFilter);
+      }
+      
+      const url = `${API_BASE}/appointments/doctor/${doctorId}${params.toString() ? '?' + params.toString() : ''}`;
+      console.log('Fetching appointments from:', url); // Debug log
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
+      console.log('Fetched appointments:', data); // Debug log
       setAppointments(data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
+      setAppointments([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -49,6 +67,11 @@ const DoctorDashboard = () => {
   const fetchAvailability = async () => {
     try {
       const response = await fetch(`${API_BASE}/appointments/doctor/${doctorId}/availability`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       
       // Initialize availability with default values for all days
@@ -81,10 +104,16 @@ const DoctorDashboard = () => {
   const fetchStats = async () => {
     try {
       const response = await fetch(`${API_BASE}/appointments/stats?period=today`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       setStats(data);
     } catch (error) {
       console.error('Error fetching stats:', error);
+      setStats({});
     }
   };
 
@@ -100,9 +129,12 @@ const DoctorDashboard = () => {
       if (response.ok) {
         fetchAppointments();
         alert(`Appointment ${status} successfully!`);
+      } else {
+        throw new Error('Failed to update appointment status');
       }
     } catch (error) {
       console.error('Error updating appointment:', error);
+      alert('Failed to update appointment status');
     }
   };
 
@@ -140,13 +172,30 @@ const DoctorDashboard = () => {
     );
   };
 
+  // Handle date change
+  const handleDateChange = (newDate) => {
+    setSelectedDate(newDate);
+    setShowAllDates(false); // Reset show all dates when a specific date is selected
+  };
+
+  // Handle show all dates toggle
+  const handleShowAllDates = () => {
+    setShowAllDates(!showAllDates);
+  };
+
+  // Clear date filter
+  const clearDateFilter = () => {
+    setSelectedDate('');
+    setShowAllDates(true);
+  };
+
   useEffect(() => {
     if (doctorId) {
       fetchAppointments();
       fetchAvailability();
       fetchStats();
     }
-  }, [doctorId, selectedDate, statusFilter]);
+  }, [doctorId, selectedDate, statusFilter, showAllDates]);
 
   const getStatusColor = (status) => {
     const colors = {
@@ -166,8 +215,17 @@ const DoctorDashboard = () => {
     });
   };
 
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-4">
       {/* Header */}
       <div className="bg-green-800 text-white p-4 shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -177,7 +235,9 @@ const DoctorDashboard = () => {
           </div>
           <div className="flex items-center space-x-4">
             <div className="bg-green-700 px-4 py-2 rounded-lg">
-              <span className="text-sm">Today's Appointments: {appointments.length}</span>
+              <span className="text-sm">
+                {showAllDates ? 'All Appointments' : `Appointments: ${appointments.length}`}
+              </span>
             </div>
           </div>
         </div>
@@ -190,7 +250,6 @@ const DoctorDashboard = () => {
             {[
               { id: 'appointments', label: 'Appointments', icon: Calendar },
               { id: 'availability', label: 'Availability', icon: Settings },
-              { id: 'patients', label: 'Patients', icon: Users },
               { id: 'overview', label: 'Overview', icon: CheckCircle }
             ].map((tab) => (
               <button
@@ -214,7 +273,7 @@ const DoctorDashboard = () => {
       <div className="max-w-7xl mx-auto p-6">
         {activeTab === 'appointments' && (
           <div className="space-y-6">
-            {/* Filters */}
+            {/* Enhanced Filters */}
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex flex-wrap gap-4 items-center">
                 <div className="flex items-center space-x-2">
@@ -222,10 +281,24 @@ const DoctorDashboard = () => {
                   <input
                     type="date"
                     value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    onChange={(e) => handleDateChange(e.target.value)}
+                    disabled={showAllDates}
+                    className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   />
                 </div>
+                
+                <div className="flex items-center space-x-2">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showAllDates}
+                      onChange={handleShowAllDates}
+                      className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                    />
+                    <span className="text-sm text-gray-700">Show all dates</span>
+                  </label>
+                </div>
+                
                 <div className="flex items-center space-x-2">
                   <Filter className="w-4 h-4 text-gray-500" />
                   <select
@@ -240,6 +313,26 @@ const DoctorDashboard = () => {
                     <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
+                
+                {(selectedDate || showAllDates) && (
+                  <button
+                    onClick={clearDateFilter}
+                    className="text-sm text-green-600 hover:text-green-700 underline"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+              
+              {/* Display current filter info */}
+              <div className="mt-3 text-sm text-gray-600">
+                {showAllDates ? (
+                  <span>Showing all appointments</span>
+                ) : selectedDate ? (
+                  <span>Showing appointments for {formatDate(selectedDate)}</span>
+                ) : (
+                  <span>Select a date to view appointments</span>
+                )}
               </div>
             </div>
 
@@ -252,7 +345,9 @@ const DoctorDashboard = () => {
             ) : appointments.length === 0 ? (
               <div className="text-center py-8">
                 <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No appointments found for the selected date</p>
+                <p className="text-gray-500">
+                  {showAllDates ? 'No appointments found' : 'No appointments found for the selected date'}
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -266,6 +361,10 @@ const DoctorDashboard = () => {
                         <div>
                           <h3 className="font-semibold text-gray-900">{appointment.patient_name}</h3>
                           <div className="flex items-center space-x-4 text-sm text-gray-500">
+                            <span className="flex items-center">
+                              <Calendar className="w-4 h-4 mr-1" />
+                              {new Date(appointment.appointment_date).toLocaleDateString()}
+                            </span>
                             <span className="flex items-center">
                               <Clock className="w-4 h-4 mr-1" />
                               {formatTime(appointment.appointment_time)}
@@ -401,16 +500,6 @@ const DoctorDashboard = () => {
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'patients' && (
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Patient Management</h2>
-            <div className="text-center py-8">
-              <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">Patient management features coming soon...</p>
             </div>
           </div>
         )}

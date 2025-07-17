@@ -464,7 +464,7 @@ const CommunicationHub = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                                Hospital Communication Hub
+                                Communication MedConnect
                             </h1>
                             <p className="text-gray-600 flex items-center">
                                 <Circle className="w-2 h-2 text-green-500 mr-2 fill-current" />

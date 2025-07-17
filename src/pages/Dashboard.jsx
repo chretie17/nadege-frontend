@@ -1,645 +1,382 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  LineChart, Line, AreaChart, Area, PieChart, Pie, Cell
-} from 'recharts';
-import API_URL from '../api';
+import React, { useState, useEffect, useMemo } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from 'recharts';
+import { Calendar, Users, Clock, MessageCircle, Bell, User, Activity, TrendingUp, FileText, CheckCircle, ArrowUp, ArrowDown } from 'lucide-react';
+
+const API_BASE = 'http://localhost:5000/api';
 
 const Dashboard = () => {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [quickStats, setQuickStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview');
-  
-  // State for dashboard data
-  const [dashboardStats, setDashboardStats] = useState(null);
-  const [skillsDistribution, setSkillsDistribution] = useState([]);
-  const [jobMarketTrends, setJobMarketTrends] = useState({ categories: [], data: [] });
-  const [applicationFunnel, setApplicationFunnel] = useState([]);
-  
-  useEffect(() => {
-    // Fetch all dashboard data
-    const fetchDashboardData = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // Fetch all data in parallel
-        const [statsRes, skillsRes, jobTrendsRes, funnelRes] = await Promise.all([
-          axios.get(`${API_URL}/dashboard/stats`),
-          axios.get(`${API_URL}/dashboard/skills-distribution`),
-          axios.get(`${API_URL}/dashboard/job-market-trends`),
-          axios.get(`${API_URL}/dashboard/application-funnel`)
-        ]);
-        
-        // Set all data to state
-        setDashboardStats(statsRes.data);
-        setSkillsDistribution(skillsRes.data);
-        setJobMarketTrends(jobTrendsRes.data);
-        setApplicationFunnel(funnelRes.data);
-        
-      } catch (err) {
-        console.error('Error fetching dashboard data:', err);
-        setError('Failed to load dashboard data. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchDashboardData();
+
+  const currentUser = useMemo(() => {
+    try {
+      const userData = localStorage.getItem('user');
+      return userData ? JSON.parse(userData) : {};
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      return {};
+    }
   }, []);
-  
-  // Format numbers with commas for readability
-  const formatNumber = (num) => {
-    return num ? num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "0";
-  };
-  
-  // Calculate growth percentage and determine if it's positive or negative
-  const calculateGrowth = (current, previous) => {
-    if (!previous) return { value: 0, isPositive: true };
-    const growth = ((current - previous) / previous) * 100;
-    return { value: Math.abs(growth).toFixed(1), isPositive: growth >= 0 };
+
+  const userId = currentUser?.id;
+  const userRole = currentUser?.role || 'admin';
+
+  useEffect(() => {
+    if (userId && userRole) {
+      fetchDashboardData();
+      fetchUserProfile();
+      fetchQuickStats();
+    } else {
+      setError('User authentication required. Please log in again.');
+      setLoading(false);
+    }
+  }, [userId, userRole]);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/dashboard?userId=${userId}&role=${userRole}`);
+      if (!response.ok) throw new Error('Failed to fetch dashboard data');
+      const data = await response.json();
+      setDashboardData(data);
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
-  // Colors for charts
-  const CHART_COLORS = {
-    primary: '#4f46e5',
-    secondary: '#059669',
-    accent: '#0ea5e9',
-    warning: '#f59e0b',
-    danger: '#ef4444',
-    purple: '#8b5cf6',
-    pink: '#ec4899',
-    indigo: '#6366f1',
-    green: '#3b82f6',
-    teal: '#14b8a6',
-    emerald: '#10b981',
-    amber: '#f59e0b',
-    red: '#ef4444'
+  const fetchUserProfile = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/dashboard/profile/${userId}`);
+      if (!response.ok) throw new Error('Failed to fetch user profile');
+      const data = await response.json();
+      setUserProfile(data);
+    } catch (err) {
+      setError(err.message);
+    }
   };
-  
-  // Generate gradient colors for charts
-  const gradientOffset = () => {
-    if (!applicationFunnel.length) return 0;
-    const dataMax = Math.max(...applicationFunnel.map(item => item.count));
-    const dataMin = Math.min(...applicationFunnel.map(item => item.count));
-    return dataMax <= 0 ? 0 : dataMin / dataMax;
+
+  const fetchQuickStats = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/dashboard/stats?userId=${userId}&role=${userRole}`);
+      if (!response.ok) throw new Error('Failed to fetch quick stats');
+      const data = await response.json();
+      setQuickStats(data);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  const formatTime = (timeString) => {
+    if (!timeString) return '';
+    const time = new Date(`2000-01-01 ${timeString}`);
+    return time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      pending: 'bg-amber-50 text-amber-700 border-amber-200',
+      confirmed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      completed: 'bg-green-50 text-green-700 border-green-200',
+      cancelled: 'bg-red-50 text-red-700 border-red-200'
+    };
+    return colors[status] || 'bg-gray-50 text-gray-700 border-gray-200';
+  };
+
+  const getChartData = () => {
+    if (!dashboardData?.stats && !quickStats) return [];
+    
+    const stats = dashboardData?.stats || {};
+    
+    if (userRole === 'admin') {
+      return [
+        { name: 'Patients', value: stats.total_patients || 0, color: '#0d9488' },
+        { name: 'Doctors', value: stats.total_doctors || 0, color: '#0891b2' },
+        { name: 'Pending', value: stats.pending_appointments || 0, color: '#f59e0b' },
+        { name: 'Today', value: stats.today_appointments || 0, color: '#8b5cf6' }
+      ];
+    } else {
+      return [
+        { name: 'Total', value: quickStats?.total_appointments || 0, color: '#0d9488' },
+        { name: 'Pending', value: quickStats?.pending_appointments || 0, color: '#f59e0b' },
+        { name: userRole === 'doctor' ? 'Today' : 'Confirmed', value: quickStats?.today_appointments || quickStats?.confirmed_appointments || 0, color: '#8b5cf6' },
+        { name: userRole === 'doctor' ? 'Week' : 'Completed', value: quickStats?.week_appointments || quickStats?.completed_appointments || 0, color: '#0891b2' }
+      ];
+    }
+  };
+
+  const getPieData = () => {
+    if (!dashboardData?.stats) return [];
+    const { pending_appointments = 0, confirmed_appointments = 0, today_appointments = 0 } = dashboardData.stats;
+    return [
+      { name: 'Pending', value: pending_appointments, fill: '#f59e0b' },
+      { name: 'Confirmed', value: confirmed_appointments, fill: '#10b981' },
+      { name: 'Today', value: today_appointments, fill: '#8b5cf6' }
+    ];
+  };
+
+  const StatCard = ({ title, value, icon: Icon, color, trend }) => (
+    <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-all duration-200">
+      <div className="flex items-center justify-between mb-4">
+        <div className={`p-3 rounded-xl ${color}`}>
+          <Icon className="w-6 h-6 text-white" />
+        </div>
+        {trend && (
+          <div className={`flex items-center text-sm ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {trend > 0 ? <ArrowUp className="w-4 h-4 mr-1" /> : <ArrowDown className="w-4 h-4 mr-1" />}
+            {Math.abs(trend)}%
+          </div>
+        )}
+      </div>
+      <div>
+        <h3 className="text-3xl font-bold text-gray-900 mb-1">{value}</h3>
+        <p className="text-sm text-gray-600">{title}</p>
+      </div>
+    </div>
+  );
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+          <p className="font-semibold text-gray-800">{label}</p>
+          <p className="text-teal-600">{`Value: ${payload[0].value}`}</p>
+        </div>
+      );
+    }
+    return null;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 flex justify-center items-center">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600"></div>
-          <p className="mt-4 text-lg text-indigo-600 font-medium">Loading dashboard data...</p>
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 to-green-50 flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin"></div>
+          <p className="text-teal-600 font-medium">Loading Dashboard...</p>
         </div>
       </div>
     );
   }
-  
+
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 flex justify-center items-center">
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md max-w-lg">
-          <div className="flex items-center">
-            <svg className="h-6 w-6 text-red-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="font-medium">{error}</p>
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Activity className="w-8 h-8 text-red-600" />
           </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Error Loading Dashboard</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
           <button 
-            className="mt-4 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md transition-colors duration-300"
             onClick={() => window.location.reload()}
+            className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
           >
-            Retry
+            Try Again
           </button>
         </div>
       </div>
     );
   }
 
-  // Create comparison stats for cards
-  const userGrowth = calculateGrowth(
-    dashboardStats?.userStats?.totalUsers,
-    dashboardStats?.userStats?.totalUsers - dashboardStats?.userStats?.newUsersLast30Days
-  );
-  
-  const jobGrowth = calculateGrowth(
-    dashboardStats?.jobStats?.activeJobs,
-    dashboardStats?.jobStats?.totalJobs - dashboardStats?.jobStats?.activeJobs
-  );
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Dashboard Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-              <p className="text-sm text-gray-500">Welcome back. Here's what's happening with your platform today.</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+      {/* Header */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-teal-600 to-green-600 rounded-2xl flex items-center justify-center">
+                <Activity className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Healthcare Dashboard
+                </h1>
+                <p className="text-gray-600">Welcome back, {userProfile?.name || currentUser?.name || 'User'}</p>
+              </div>
             </div>
-            <div className="flex space-x-3">
-              
+            <div className="flex items-center space-x-6">
+              <div className="relative">
+                <MessageCircle className="w-6 h-6 text-gray-600 hover:text-teal-600 cursor-pointer transition-colors" />
+                {dashboardData?.unread_messages > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                    {dashboardData.unread_messages}
+                  </span>
+                )}
+              </div>
+              <div className="relative">
+                <Bell 
+                  className="w-6 h-6 text-gray-600 hover:text-teal-600 cursor-pointer transition-colors" 
+                  onClick={() => window.location.href = '/chat'}
+                />
+                {dashboardData?.unread_notifications > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                    {dashboardData.unread_notifications}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center space-x-3 bg-gray-50 rounded-full px-4 py-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-teal-600 to-green-600 rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{userProfile?.name || currentUser?.name}</p>
+                  <p className="text-xs text-gray-500 capitalize">{userRole}</p>
+                </div>
+              </div>
             </div>
-          </div>
-          {/* Navigation Tabs */}
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
-              <button
-                onClick={() => setActiveTab('overview')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'overview'
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Overview
-              </button>
-              
-            </nav>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-          {/* Total Users Card */}
-          <div className="bg-white overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 bg-indigo-500 rounded-md p-3">
-                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Users</dt>
-                    <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">
-                        {formatNumber(dashboardStats?.userStats?.totalUsers)}
-                      </div>
-                      <div className={`ml-2 flex items-baseline text-sm font-semibold ${
-                        userGrowth.isPositive ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {userGrowth.isPositive ? (
-                          <svg className="self-center flex-shrink-0 h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                            <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                          </svg>
-                        ) : (
-                          <svg className="self-center flex-shrink-0 h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                            <path fillRule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                        <span className="sr-only">{userGrowth.isPositive ? 'Increased' : 'Decreased'} by</span>
-                        {userGrowth.value}%
-                      </div>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-50 px-5 py-3">
-              <div className="text-sm">
-                <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-                  {formatNumber(dashboardStats?.userStats?.newUsersLast30Days)} new in last 30 days
-                </a>
-              </div>
-            </div>
-          </div>
-          
-          {/* Active Jobs Card */}
-          <div className="bg-white overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
-                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Active Jobs</dt>
-                    <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">
-                        {formatNumber(dashboardStats?.jobStats?.activeJobs)}
-                      </div>
-                      <div className={`ml-2 flex items-baseline text-sm font-semibold ${
-                        jobGrowth.isPositive ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {jobGrowth.isPositive ? (
-                          <svg className="self-center flex-shrink-0 h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                            <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                          </svg>
-                        ) : (
-                          <svg className="self-center flex-shrink-0 h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                            <path fillRule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                        <span className="sr-only">{jobGrowth.isPositive ? 'Increased' : 'Decreased'} by</span>
-                        {jobGrowth.value}%
-                      </div>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-50 px-5 py-3">
-              <div className="text-sm">
-                <a href="#" className="font-medium text-green-600 hover:text-green-500">
-                  Out of {formatNumber(dashboardStats?.jobStats?.totalJobs)} total jobs
-                </a>
-              </div>
-            </div>
-          </div>
-          
-          {/* Success Rate Card */}
-          <div className="bg-white overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
-                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Success Rate</dt>
-                    <dd className="mt-1 flex justify-between items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">
-                        {dashboardStats?.applicationStats?.successRate || 0}%
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2.5 ml-2">
-                        <div className="bg-green-600 h-2.5 rounded-full" style={{ width: `${dashboardStats?.applicationStats?.successRate || 0}%` }}></div>
-                      </div>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-50 px-5 py-3">
-              <div className="text-sm">
-                <a href="#" className="font-medium text-green-600 hover:text-green-500">
-                  {formatNumber(dashboardStats?.applicationStats?.acceptedApplications)} accepted applications
-                </a>
-              </div>
-            </div>
-          </div>
-          
-          {/* Community Engagement Card */}
-          <div className="bg-white overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
-                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path>
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Community Activity</dt>
-                    <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">
-                        {formatNumber(
-                          (dashboardStats?.communityStats?.newTopicsLast30Days || 0) + 
-                          (dashboardStats?.communityStats?.newPostsLast30Days || 0)
-                        )}
-                      </div>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-50 px-5 py-3 flex justify-between items-center">
-              <div className="text-sm">
-                <a href="#" className="font-medium text-purple-600 hover:text-purple-500">
-                  New posts & topics in last 30 days
-                </a>
-              </div>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                Active
-              </span>
-            </div>
-          </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {userRole === 'admin' ? (
+            <>
+              <StatCard title="Total Patients" value={dashboardData?.stats?.total_patients || 0} icon={Users} color="bg-gradient-to-r from-teal-600 to-teal-700" trend={12} />
+              <StatCard title="Total Doctors" value={dashboardData?.stats?.total_doctors || 0} icon={User} color="bg-gradient-to-r from-green-600 to-green-700" trend={8} />
+              <StatCard title="Pending Appointments" value={dashboardData?.stats?.pending_appointments || 0} icon={Calendar} color="bg-gradient-to-r from-amber-600 to-amber-700" trend={-5} />
+              <StatCard title="Today's Appointments" value={dashboardData?.stats?.today_appointments || 0} icon={Clock} color="bg-gradient-to-r from-purple-600 to-purple-700" trend={15} />
+            </>
+          ) : (
+            <>
+              <StatCard title="Total Appointments" value={quickStats?.total_appointments || 0} icon={Calendar} color="bg-gradient-to-r from-teal-600 to-teal-700" trend={10} />
+              <StatCard title="Pending" value={quickStats?.pending_appointments || 0} icon={Clock} color="bg-gradient-to-r from-amber-600 to-amber-700" trend={-3} />
+              <StatCard title={userRole === 'doctor' ? 'Today' : 'Confirmed'} value={quickStats?.today_appointments || quickStats?.confirmed_appointments || 0} icon={CheckCircle} color="bg-gradient-to-r from-green-600 to-green-700" trend={7} />
+              <StatCard title={userRole === 'doctor' ? 'This Week' : 'Completed'} value={quickStats?.week_appointments || quickStats?.completed_appointments || 0} icon={TrendingUp} color="bg-gradient-to-r from-purple-600 to-purple-700" trend={20} />
+            </>
+          )}
         </div>
-        
-        {/* Charts */}
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Skills Distribution Chart */}
-          <div className="bg-white overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Most Common Skills</h2>
-                <div className="flex gap-2">
-                  <button className="p-1 rounded-md hover:bg-gray-100">
-                    <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
-                    </svg>
-                  </button>
-                  <button className="p-1 rounded-md hover:bg-gray-100">
-                    <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                    </svg>
-                  </button>
-                  <button className="p-1 rounded-md hover:bg-gray-100">
-                    <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={skillsDistribution}
-                    layout="vertical"
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Modern Bar Chart */}
+          <div className="bg-white rounded-3xl shadow-sm p-8 border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Overview Analytics</h3>
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={getChartData()} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <defs>
+                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#0d9488" />
+                    <stop offset="100%" stopColor="#0f766e" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} />
+                <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="value" fill="url(#barGradient)" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Enhanced Pie Chart */}
+          {userRole === 'admin' && (
+            <div className="bg-white rounded-3xl shadow-sm p-8 border border-gray-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">Appointment Distribution</h3>
+              <ResponsiveContainer width="100%" height={320}>
+                <PieChart>
+                  <Pie
+                    data={getPieData()}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis type="number" tickLine={false} axisLine={false} />
-                    <YAxis 
-                      dataKey="skillName" 
-                      type="category" 
-                      width={150} 
-                      tick={{ fill: '#4b5563' }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <Legend verticalAlign="top" height={36} />
-                    {jobMarketTrends.categories.map((category, index) => {
-                      // Generate different colors for each category
-                      const colors = [
-                        CHART_COLORS.indigo, 
-                        CHART_COLORS.teal, 
-                        CHART_COLORS.amber, 
-                        CHART_COLORS.purple, 
-                        CHART_COLORS.pink, 
-                        CHART_COLORS.emerald
-                      ];
-                      return (
-                        <Line 
-                          key={category}
-                          type="monotone" 
-                          dataKey={category} 
-                          name={category}
-                          stroke={colors[index % colors.length]} 
-                          strokeWidth={3}
-                          dot={{ strokeWidth: 2, r: 4 }}
-                          activeDot={{ r: 6, strokeWidth: 0 }} 
-                        />
-                      );
-                    })}
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        borderRadius: '6px',
-                        border: 'none',
-                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
-                      }}
-                    />
-                    <Bar 
-                      dataKey="userCount" 
-                      name="Users with skill" 
-                      radius={[0, 4, 4, 0]}
-                      barSize={20}
-                    >
-                      {skillsDistribution.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={index % 2 === 0 ? CHART_COLORS.indigo : CHART_COLORS.green} 
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+                    {getPieData().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-          </div>
-          
-         {/* Job Market Trends Chart */}
-<div className="bg-white overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl">
-  <div className="p-6">
-    <div className="flex justify-between items-center mb-4">
-      <h2 className="text-lg font-semibold text-gray-900">Job Posting Trends</h2>
-      <div className="flex items-center space-x-4">
-        <div className="flex items-center">
-          <button className="p-1 rounded-md hover:bg-gray-100">
-            <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-            </svg>
-          </button>
-          <span className="mx-2 text-sm font-medium text-gray-700">2025</span>
-          <button className="p-1 rounded-md hover:bg-gray-100">
-            <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </button>
+          )}
         </div>
-        <select className="block w-28 py-1 px-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
-          <option>Monthly</option>
-          <option>Quarterly</option>
-          <option>Yearly</option>
-        </select>
-      </div>
-    </div>
-    <div className="h-80">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={jobMarketTrends.data}
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-          <XAxis 
-            dataKey="month" 
-            tick={{ fill: '#4b5563' }}
-            tickLine={false} 
-            axisLine={false}
-          />
-          <YAxis 
-            tick={{ fill: '#4b5563' }}
-            tickLine={false}
-            axisLine={false}
-          />
-          <Tooltip 
-            contentStyle={{ 
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              borderRadius: '6px',
-              border: 'none',
-              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
-            }}
-          />
-          <Legend verticalAlign="top" height={36} />
-          {jobMarketTrends.categories.map((category, index) => {
-            // Generate different colors for each category
-            const colors = [
-              CHART_COLORS.indigo, 
-              CHART_COLORS.teal, 
-              CHART_COLORS.amber, 
-              CHART_COLORS.purple, 
-              CHART_COLORS.pink, 
-              CHART_COLORS.emerald
-            ];
-            return (
-              <Line 
-                key={category}
-                type="monotone" 
-                dataKey={category} 
-                name={category}
-                stroke={colors[index % colors.length]} 
-                strokeWidth={3}
-                dot={{ strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, strokeWidth: 0 }} 
-              />
-            );
-          })}
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  </div>
-</div>
-</div>
 
-{/* Application Funnel Chart */}
-<div className="mt-8 bg-white overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl">
-  <div className="p-6">
-    <div className="flex justify-between items-center mb-4">
-      <h2 className="text-lg font-semibold text-gray-900">Application Pipeline</h2>
-      <div className="flex gap-2">
-        <button className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          Last 7 Days
-        </button>
-        <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-full shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          Last 30 Days
-        </button>
-        <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-full shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          All Time
-        </button>
-      </div>
-    </div>
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2">
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={applicationFunnel}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-            >
-              <defs>
-                <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.1}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="stage" 
-                tick={{ fill: '#4b5563' }}
-                tickLine={false} 
-                axisLine={false}
-              />
-              <YAxis 
-                tick={{ fill: '#4b5563' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  borderRadius: '6px',
-                  border: 'none',
-                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
-                }}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="count" 
-                name="Applications" 
-                stroke="#4f46e5" 
-                strokeWidth={2}
-                fillOpacity={1}
-                fill="url(#colorUv)" 
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-      <div className="flex flex-col justify-center">
-        <div className="text-center mb-6">
-          <h3 className="text-sm font-medium text-gray-500">Conversion Rate</h3>
-          <div className="mt-1 relative">
-            <div className="flex items-center justify-center">
-              <span className="text-5xl font-extrabold text-indigo-600">
-                {applicationFunnel.length > 0 ? 
-                  ((applicationFunnel[applicationFunnel.length - 1].count / applicationFunnel[0].count) * 100).toFixed(1) : 
-                  "0"}%
-              </span>
-            </div>
-            <div className="mt-4 text-sm text-gray-900">
-              {applicationFunnel.length > 0 ? 
-                `${formatNumber(applicationFunnel[applicationFunnel.length - 1].count)} of ${formatNumber(applicationFunnel[0].count)} applications` : 
-                "No data available"}
-            </div>
+        {/* Recent Appointments Table */}
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-8 border-b border-gray-100">
+            <h3 className="text-xl font-bold text-gray-900">Recent Appointments</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50/50">
+                <tr>
+                  <th className="px-8 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date & Time</th>
+                  {userRole === 'admin' && (
+                    <>
+                      <th className="px-8 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Patient</th>
+                      <th className="px-8 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Doctor</th>
+                    </>
+                  )}
+                  {userRole === 'doctor' && (
+                    <th className="px-8 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Patient</th>
+                  )}
+                  {userRole === 'patient' && (
+                    <>
+                      <th className="px-8 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Doctor</th>
+                      <th className="px-8 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Specialization</th>
+                    </>
+                  )}
+                  <th className="px-8 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-100">
+                {dashboardData?.recent_appointments?.map((appointment) => (
+                  <tr key={appointment.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-900">
+                      <div className="font-medium">{formatDate(appointment.appointment_date)}</div>
+                      <div className="text-gray-500">{formatTime(appointment.appointment_time)}</div>
+                    </td>
+                    {userRole === 'admin' && (
+                      <>
+                        <td className="px-8 py-6 whitespace-nowrap text-sm font-medium text-gray-900">{appointment.patient_name}</td>
+                        <td className="px-8 py-6 whitespace-nowrap text-sm font-medium text-gray-900">{appointment.doctor_name}</td>
+                      </>
+                    )}
+                    {userRole === 'doctor' && (
+                      <td className="px-8 py-6 whitespace-nowrap text-sm font-medium text-gray-900">{appointment.patient_name}</td>
+                    )}
+                    {userRole === 'patient' && (
+                      <>
+                        <td className="px-8 py-6 whitespace-nowrap text-sm font-medium text-gray-900">{appointment.doctor_name}</td>
+                        <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-600">{appointment.specialization}</td>
+                      </>
+                    )}
+                    <td className="px-8 py-6 whitespace-nowrap">
+                      <span className={`inline-flex px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(appointment.status)}`}>
+                        {appointment.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {(!dashboardData?.recent_appointments || dashboardData.recent_appointments.length === 0) && (
+              <div className="text-center py-12 text-gray-500">
+                <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p>No recent appointments found</p>
+              </div>
+            )}
           </div>
         </div>
-        <div className="space-y-2">
-          {applicationFunnel.map((stage, index) => (
-            <div key={stage.stage} className="bg-gray-50 rounded-lg p-4">
-              <div className="flex justify-between items-center mb-1">
-                <h4 className="text-sm font-medium text-gray-700">{stage.stage}</h4>
-                <span className="text-sm font-bold text-indigo-600">{formatNumber(stage.count)}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-1.5">
-                <div 
-                  className="bg-indigo-600 h-1.5 rounded-full" 
-                  style={{ 
-                    width: `${applicationFunnel.length > 0 ? 
-                      (stage.count / applicationFunnel[0].count) * 100 : 0}%` 
-                  }}
-                ></div>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
-  </div>
-</div>
-</main>
-
-{/* Footer */}
-<footer className="bg-white border-t border-gray-200 mt-8">
-  <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-    <div className="flex justify-between items-center">
-      <div className="flex items-center">
-        <p className="text-sm text-gray-500">© 2025 Your Company. All rights reserved.</p>
-      </div>
-      <div className="flex space-x-6">
-        <a href="#" className="text-gray-400 hover:text-gray-500">
-          <span className="sr-only">Help Center</span>
-          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-          </svg>
-        </a>
-        <a href="#" className="text-gray-400 hover:text-gray-500">
-          <span className="sr-only">Settings</span>
-          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-          </svg>
-        </a>
-        <a href="#" className="text-gray-400 hover:text-gray-500">
-          <span className="sr-only">Documentation</span>
-          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-          </svg>
-        </a>
-      </div>
-    </div>
-  </div>
-</footer>
-</div>
-);
+  );
 };
 
 export default Dashboard;

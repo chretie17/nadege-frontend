@@ -17,7 +17,13 @@ import {
   Target,
   LogOut,
   Settings,
-  Stethoscope
+  Stethoscope,
+  Bell,
+  Check,
+  Trash2,
+  Clock,
+  User,
+  Calendar
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -27,6 +33,13 @@ const Sidebar = () => {
     const location = useLocation();
     const [collapsed, setCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    const [showNotifications, setShowNotifications] = useState(false);
+    
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [notificationsLoading, setNotificationsLoading] = useState(false);
+
+    const API_BASE = 'http://localhost:5000/api';
 
     // Handle window resize
     useEffect(() => {
@@ -40,6 +53,147 @@ const Sidebar = () => {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    // Fetch notifications
+    const fetchNotifications = async () => {
+        if (!user.id) return;
+        
+        setNotificationsLoading(true);
+        try {
+            const response = await fetch(`${API_BASE}/notifications/user/${user.id}`);
+            if (response.ok) {
+                const data = await response.json();
+                setNotifications(data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch notifications:', error);
+        } finally {
+            setNotificationsLoading(false);
+        }
+    };
+
+    // Fetch unread count
+    const fetchUnreadCount = async () => {
+        if (!user.id) return;
+        
+        try {
+            const response = await fetch(`${API_BASE}/notifications/user/${user.id}/unread-count`);
+            if (response.ok) {
+                const data = await response.json();
+                setUnreadCount(data.unread_count);
+            }
+        } catch (error) {
+            console.error('Failed to fetch unread count:', error);
+        }
+    };
+
+    // Mark notification as read
+    const markAsRead = async (notificationId) => {
+        try {
+            const response = await fetch(`${API_BASE}/notifications/${notificationId}/read`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: user.id })
+            });
+            
+            if (response.ok) {
+                setNotifications(prev => 
+                    prev.map(notif => 
+                        notif.id === notificationId 
+                            ? { ...notif, is_read: true }
+                            : notif
+                    )
+                );
+                setUnreadCount(prev => Math.max(0, prev - 1));
+            }
+        } catch (error) {
+            console.error('Failed to mark notification as read:', error);
+        }
+    };
+
+    // Mark all notifications as read
+    const markAllAsRead = async () => {
+        if (!user.id) return;
+        
+        try {
+            const response = await fetch(`${API_BASE}/notifications/user/${user.id}/read-all`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            if (response.ok) {
+                setNotifications(prev => 
+                    prev.map(notif => ({ ...notif, is_read: true }))
+                );
+                setUnreadCount(0);
+            }
+        } catch (error) {
+            console.error('Failed to mark all notifications as read:', error);
+        }
+    };
+
+    // Delete notification
+    const deleteNotification = async (notificationId) => {
+        try {
+            const response = await fetch(`${API_BASE}/notifications/${notificationId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: user.id })
+            });
+            
+            if (response.ok) {
+                setNotifications(prev => prev.filter(notif => notif.id !== notificationId));
+                // Update unread count if the deleted notification was unread
+                const deletedNotif = notifications.find(n => n.id === notificationId);
+                if (deletedNotif && !deletedNotif.is_read) {
+                    setUnreadCount(prev => Math.max(0, prev - 1));
+                }
+            }
+        } catch (error) {
+            console.error('Failed to delete notification:', error);
+        }
+    };
+
+    // Initial fetch
+    useEffect(() => {
+        if (user.id) {
+            fetchNotifications();
+            fetchUnreadCount();
+            
+            // Poll for new notifications every 30 seconds
+            const interval = setInterval(() => {
+                fetchUnreadCount();
+            }, 30000);
+            
+            return () => clearInterval(interval);
+        }
+    }, [user.id]);
+
+    // Handle notification dropdown toggle
+    const handleNotificationToggle = () => {
+        setShowNotifications(!showNotifications);
+        if (!showNotifications) {
+            fetchNotifications();
+        }
+    };
+
+    // Close notifications when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showNotifications && !event.target.closest('.notifications-dropdown')) {
+                setShowNotifications(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showNotifications]);
 
     const handleLogout = () => {
         localStorage.removeItem('role');
@@ -66,6 +220,42 @@ const Sidebar = () => {
             return user.name.charAt(0).toUpperCase();
         }
         return role.charAt(0).toUpperCase();
+    };
+
+    // Get notification type icon
+    const getNotificationIcon = (type) => {
+        switch (type) {
+            case 'booking_confirmation':
+                return <Calendar className="h-4 w-4" />;
+            case 'status_change':
+                return <Clock className="h-4 w-4" />;
+            case 'reminder':
+                return <Bell className="h-4 w-4" />;
+            default:
+                return <Bell className="h-4 w-4" />;
+        }
+    };
+
+    // Format notification time
+    const formatNotificationTime = (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInMs = now - date;
+        const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        const diffInDays = Math.floor(diffInHours / 24);
+        
+        if (diffInMinutes < 1) {
+            return 'Just now';
+        } else if (diffInMinutes < 60) {
+            return `${diffInMinutes}m ago`;
+        } else if (diffInHours < 24) {
+            return `${diffInHours}h ago`;
+        } else if (diffInDays < 7) {
+            return `${diffInDays}d ago`;
+        } else {
+            return date.toLocaleDateString();
+        }
     };
 
     // Navigation items configuration
@@ -97,6 +287,12 @@ const Sidebar = () => {
                     path: '/chat',
                     icon: MessageCircle,
                     label: 'Chat',
+                    roles: ['admin']
+                },
+                {
+                    path: '/admin-appointments',
+                    icon: Briefcase,
+                    label: 'Appointments',
                     roles: ['admin']
                 },
                 {
@@ -172,16 +368,119 @@ const Sidebar = () => {
                             )}
                         </div>
                         
-                        {/* Collapse Button (desktop only) */}
-                        {!isMobile && (
-                            <button 
-                                onClick={() => setCollapsed(!collapsed)}
-                                className="text-gray-400 hover:text-white hover:bg-emerald-700/50 p-2 rounded-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-opacity-50"
-                                aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-                            >
-                                {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
-                            </button>
-                        )}
+                        {/* Notifications and Collapse Button */}
+                        <div className="flex items-center space-x-2">
+                            {/* Notifications Icon */}
+                            <div className="relative notifications-dropdown">
+                                <button 
+                                    onClick={handleNotificationToggle}
+                                    className="relative text-gray-400 hover:text-white hover:bg-emerald-700/50 p-2 rounded-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-opacity-50"
+                                    aria-label="Notifications"
+                                >
+                                    <Bell className="h-5 w-5" />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold animate-pulse">
+                                            {unreadCount > 9 ? '9+' : unreadCount}
+                                        </span>
+                                    )}
+                                </button>
+
+                                {/* Notifications Dropdown */}
+                                {showNotifications && (
+                                    <div className="absolute left-0 top-full mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-[9999] max-h-96 overflow-hidden">
+                                        <div className="p-4 border-b border-gray-200 bg-emerald-50">
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="font-semibold text-gray-900">Notifications</h3>
+                                                {unreadCount > 0 && (
+                                                    <button
+                                                        onClick={markAllAsRead}
+                                                        className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                                                    >
+                                                        Mark all read
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="max-h-80 overflow-y-auto">
+                                            {notificationsLoading ? (
+                                                <div className="p-4 text-center text-gray-500">
+                                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500 mx-auto"></div>
+                                                    <p className="mt-2">Loading notifications...</p>
+                                                </div>
+                                            ) : notifications.length === 0 ? (
+                                                <div className="p-4 text-center text-gray-500">
+                                                    <Bell className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                                                    <p>No notifications yet</p>
+                                                </div>
+                                            ) : (
+                                                notifications.map((notification) => (
+                                                    <div
+                                                        key={notification.id}
+                                                        className={`p-3 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
+                                                            !notification.is_read ? 'bg-blue-50' : ''
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-start space-x-3">
+                                                            <div className={`flex-shrink-0 p-2 rounded-full ${
+                                                                notification.notification_type === 'booking_confirmation' ? 'bg-green-100 text-green-600' :
+                                                                notification.notification_type === 'status_change' ? 'bg-blue-100 text-blue-600' :
+                                                                'bg-gray-100 text-gray-600'
+                                                            }`}>
+                                                                {getNotificationIcon(notification.notification_type)}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className={`text-sm ${!notification.is_read ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>
+                                                                    {notification.message}
+                                                                </p>
+                                                                {notification.related_user_name && (
+                                                                    <p className="text-xs text-gray-500 mt-1">
+                                                                        {notification.related_user_name}
+                                                                        {notification.doctor_specialization && ` - ${notification.doctor_specialization}`}
+                                                                    </p>
+                                                                )}
+                                                                <p className="text-xs text-gray-400 mt-1">
+                                                                    {formatNotificationTime(notification.sent_at)}
+                                                                </p>
+                                                            </div>
+                                                            <div className="flex items-center space-x-1">
+                                                                {!notification.is_read && (
+                                                                    <button
+                                                                        onClick={() => markAsRead(notification.id)}
+                                                                        className="text-emerald-600 hover:text-emerald-700 p-1 rounded"
+                                                                        title="Mark as read"
+                                                                    >
+                                                                        <Check className="h-4 w-4" />
+                                                                    </button>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => deleteNotification(notification.id)}
+                                                                    className="text-red-600 hover:text-red-700 p-1 rounded"
+                                                                    title="Delete notification"
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Collapse Button (desktop only) */}
+                            {!isMobile && (
+                                <button 
+                                    onClick={() => setCollapsed(!collapsed)}
+                                    className="text-gray-400 hover:text-white hover:bg-emerald-700/50 p-2 rounded-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-opacity-50"
+                                    aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                                >
+                                    {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {/* Navigation Links */}
@@ -290,6 +589,27 @@ const Sidebar = () => {
                 nav::-webkit-scrollbar-thumb:hover {
                     background: rgba(16, 185, 129, 0.8);
                 }
+
+                /* Notification dropdown scrollbar */
+                .notifications-dropdown div::-webkit-scrollbar {
+                    width: 6px;
+                }
+
+                .notifications-dropdown div::-webkit-scrollbar-track {
+                    background: rgba(156, 163, 175, 0.1);
+                    border-radius: 10px;
+                }
+
+                .notifications-dropdown div::-webkit-scrollbar-thumb {
+                    background: rgba(156, 163, 175, 0.3);
+                    border-radius: 10px;
+                }
+
+                .notifications-dropdown div::-webkit-scrollbar-thumb:hover {
+                    background: rgba(156, 163, 175, 0.5);
+                
+                }
+                    
             `}</style>
         </>
     );
