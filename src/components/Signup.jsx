@@ -14,7 +14,7 @@ const Register = () => {
         skills: '',
         experience: '',
         education: '',
-        role: 'user'
+        role: 'patient'
     });
 
     const navigate = useNavigate();
