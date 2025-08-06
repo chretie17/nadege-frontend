@@ -29,6 +29,11 @@ const CommunicationHub = () => {
     const [isSocketConnected, setIsSocketConnected] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const socketRef = useRef(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+const [isUploading, setIsUploading] = useState(false);
+const fileInputRef = useRef(null);
+const [previewImage, setPreviewImage] = useState(null);
+const [showImagePreview, setShowImagePreview] = useState(false);
     const chatContainerRef = useRef(null);
 
     // Get current user from localStorage with proper validation
@@ -47,6 +52,21 @@ const CommunicationHub = () => {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
     };
+    const isImageFile = (fileType) => {
+    return fileType && fileType.startsWith('image/');
+};
+// ADD function to handle image preview:
+const openImagePreview = (attachmentUrl, attachmentName) => {
+    const fullUrl = `${API_BASE}/communication/attachment/${attachmentUrl.split('/').pop()}`;
+    setPreviewImage({ url: fullUrl, name: attachmentName });
+    setShowImagePreview(true);
+};
+
+// ADD function to close preview:
+const closeImagePreview = () => {
+    setShowImagePreview(false);
+    setPreviewImage(null);
+};
 
     // Initialize Socket.io
     useEffect(() => {
@@ -124,6 +144,16 @@ const CommunicationHub = () => {
     useEffect(() => {
         scrollToBottom();
     }, [conversation]);
+    useEffect(() => {
+    const handleKeyPress = (e) => {
+        if (e.key === 'Escape' && showImagePreview) {
+            closeImagePreview();
+        }
+    };
+    
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+}, [showImagePreview]);
 
     const showPopupNotification = (notification) => {
         setPopupNotifications(prev => [...prev, notification]);
@@ -135,7 +165,17 @@ const CommunicationHub = () => {
     const removePopupNotification = (id) => {
         setPopupNotifications(prev => prev.filter(n => n.id !== id));
     };
-
+    const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        // Check file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File size must be less than 10MB');
+            return;
+        }
+        setSelectedFile(file);
+    }
+    };
     const fetchMessages = async () => {
         try {
             const response = await fetch(`${API_BASE}/communication/messages/${currentUserId}`);
@@ -181,20 +221,26 @@ const CommunicationHub = () => {
     };
 
     const fetchConversation = async (userId) => {
-        try {
-            setIsLoading(true);
-            const response = await fetch(`${API_BASE}/communication/conversation/${currentUserId}/${userId}`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const data = await response.json();
-            setConversation(data);
-            
-            markConversationAsRead(userId);
-        } catch (error) {
-            console.error('Error fetching conversation:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    try {
+        setIsLoading(true);
+        const response = await fetch(`${API_BASE}/communication/conversation/${currentUserId}/${userId}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        
+        // Validate attachment URLs
+        const validatedData = data.map(msg => ({
+            ...msg,
+            attachment_url: msg.attachment_url ? msg.attachment_url : null
+        }));
+        
+        setConversation(validatedData);
+        markConversationAsRead(userId);
+    } catch (error) {
+        console.error('Error fetching conversation:', error);
+    } finally {
+        setIsLoading(false);
+    }
+};
 
    const markMessageAsRead = async (messageId) => {
     try {
@@ -257,73 +303,73 @@ const CommunicationHub = () => {
         console.error('Error marking conversation as read:', error);
     }
 };
-    const sendMessage = async () => {
-        if (!newMessage.trim() || !selectedUser) {
-            console.log('Message empty or no user selected');
-            return;
-        }
+    // MODIFY your sendMessage function to handle attachments:
+const sendMessage = async () => {
+    if ((!newMessage.trim() && !selectedFile) || !selectedUser) {
+        console.log('Message empty and no file selected, or no user selected');
+        return;
+    }
+    
+    if (!isSocketConnected) {
+        alert('Connection lost. Please refresh the page.');
+        return;
+    }
+
+    setIsUploading(true);
+
+    try {
+        const formData = new FormData();
+        formData.append('sender_id', currentUserId);
+        formData.append('receiver_id', selectedUser.id);
+        formData.append('message', newMessage || '');
+        formData.append('message_type', 'direct');
         
-        if (!isSocketConnected) {
-            alert('Connection lost. Please refresh the page.');
-            return;
+        if (selectedFile) {
+            formData.append('attachment', selectedFile);
         }
 
-        if (!currentUserId) {
-            alert('User not authenticated. Please log in again.');
-            return;
-        }
-
-        console.log('Sending message:', {
-            sender_id: parseInt(currentUserId),
-            receiver_id: parseInt(selectedUser.id),
-            message: newMessage,
-            message_type: 'direct'
+        const response = await fetch(`${API_BASE}/communication/send-message`, {
+            method: 'POST',
+            body: formData, // Don't set Content-Type header, let browser set it
         });
 
-        try {
-            const response = await fetch(`${API_BASE}/communication/send-message`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    sender_id: parseInt(currentUserId),
-                    receiver_id: parseInt(selectedUser.id),
-                    message: newMessage,
-                    message_type: 'direct'
-                }),
-            });
-
-            const responseText = await response.text();
-            console.log('Server response:', responseText);
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}, response: ${responseText}`);
-            }
-
-            const result = JSON.parse(responseText);
-            console.log('Message sent successfully:', result);
-            
-            const messageToSend = newMessage;
-            setNewMessage('');
-            
-            const newMsg = {
-                id: result.messageId,
-                sender_id: parseInt(currentUserId),
-                sender_name: currentUser.name,
-                message: messageToSend,
-                message_type: 'direct',
-                is_read: false,
-                created_at: new Date().toISOString()
-            };
-            setConversation(prev => [...prev, newMsg]);
-            
-        } catch (error) {
-            console.error('Error sending message:', error);
-            alert(`Failed to send message: ${error.message}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    };
 
+        const result = await response.json();
+        console.log('Message sent successfully:', result);
+        
+        // Clear inputs
+        setNewMessage('');
+        setSelectedFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+        
+        // Add message to conversation
+        const newMsg = {
+            id: result.messageId,
+            sender_id: parseInt(currentUserId),
+            sender_name: currentUser.name,
+            message: newMessage,
+            message_type: 'direct',
+            attachment_url: result.attachment?.url,
+            attachment_name: result.attachment?.name,
+            attachment_type: result.attachment?.type,
+            attachment_size: result.attachment?.size,
+            is_read: false,
+            created_at: new Date().toISOString()
+        };
+        setConversation(prev => [...prev, newMsg]);
+        
+    } catch (error) {
+        console.error('Error sending message:', error);
+        alert(`Failed to send message: ${error.message}`);
+    } finally {
+        setIsUploading(false);
+    }
+};
     const sendTestNotification = async () => {
         if (!selectedUser) return;
 
@@ -377,7 +423,22 @@ const CommunicationHub = () => {
             !msg.is_read
         );
     };
+const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
 
+// ADD this function to get file icon:
+const getFileIcon = (fileType) => {
+    if (fileType?.startsWith('image/')) return '🖼️';
+    if (fileType?.includes('pdf')) return '📄';
+    if (fileType?.includes('word')) return '📝';
+    if (fileType?.includes('zip') || fileType?.includes('rar')) return '📦';
+    return '📁';
+};
     useEffect(() => {
         if (currentUserId) {
             fetchMessages();
@@ -559,7 +620,13 @@ const CommunicationHub = () => {
                                 ))}
                             </div>
                         </div>
-
+<input
+    type="file"
+    ref={fileInputRef}
+    onChange={handleFileSelect}
+    style={{ display: 'none' }}
+    accept="image/*,.pdf,.doc,.docx,.txt,.zip,.rar"
+/>
                         {/* Chat Area */}
                         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm p-6">
                             {selectedUser ? (
@@ -635,46 +702,136 @@ const CommunicationHub = () => {
                                                                 : ''
                                                         }
                                                     >
-                                                        <div className="text-sm">{msg.message}</div>
-                                                        <div className="flex items-center justify-between mt-2">
-                                                            <div className="flex items-center space-x-2">
-                                                                <Clock className="w-3 h-3 opacity-60" />
-                                                                <span className="text-xs opacity-75">
-                                                                    {new Date(msg.created_at).toLocaleTimeString()}
-                                                                </span>
-                                                            </div>
-                                                            {msg.receiver_id === parseInt(currentUserId) && !msg.is_read && (
-                                                                <span className="text-xs bg-red-500 text-white px-2 py-1 rounded-full font-bold">
-                                                                    NEW
-                                                                </span>
-                                                            )}
-                                                        </div>
+                                                       <div className="text-sm">
+    {msg.message && <div className="mb-2">{msg.message}</div>}
+    
+    {msg.attachment_url && (
+    <div className="mt-2 p-2 bg-white bg-opacity-20 rounded-lg">
+        <div className="flex items-center space-x-2">
+            <span className="text-lg">{getFileIcon(msg.attachment_type)}</span>
+            <div className="flex-1">
+                <div className="text-xs font-medium">{msg.attachment_name}</div>
+                <div className="text-xs opacity-75">{formatFileSize(msg.attachment_size)}</div>
+            </div>
+            <div className="flex space-x-2">
+                {/* Preview button for images */}
+                {isImageFile(msg.attachment_type) && (
+                    <button
+                        onClick={() => openImagePreview(msg.attachment_url, msg.attachment_name)}
+                        className="text-xs bg-blue-500 bg-opacity-80 text-white px-2 py-1 rounded hover:bg-opacity-100 transition-colors"
+                    >
+                        👁️ Preview
+                    </button>
+                )}
+                {/* Download button */}
+                <a
+                    href={`${API_BASE}/communication/download/${msg.attachment_url.split('/').pop()}`}
+                    download={msg.attachment_name}
+                    className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded hover:bg-opacity-30 transition-colors"
+                >
+                    📥 Download
+                </a>
+            </div>
+        </div>
+        
+        {/* Inline image preview for small images */}
+        {isImageFile(msg.attachment_type) && (
+            <div className="mt-2">
+                <img
+                    src={`${API_BASE}/communication/attachment/${msg.attachment_url.split('/').pop()}`}
+                    alt={msg.attachment_name}
+                    className="max-w-full max-h-40 rounded cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => openImagePreview(msg.attachment_url, msg.attachment_name)}
+                    onError={(e) => {
+                        e.target.style.display = 'none';
+                        console.error('Failed to load image:', msg.attachment_url);
+                    }}
+                />
+            </div>
+        )}
+    </div>
+)}
+   
+</div>
                                                     </div>
                                                 </div>
                                             ))
                                         )}
                                     </div>
 
-                                    {/* Message Input */}
-                                    <div className="flex space-x-3">
-                                        <input
-                                            type="text"
-                                            value={newMessage}
-                                            onChange={(e) => setNewMessage(e.target.value)}
-                                            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                                            placeholder="Type your message..."
-                                            className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                            disabled={!isSocketConnected}
-                                        />
-                                        <button
-                                            onClick={sendMessage}
-                                            className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center space-x-2"
-                                            disabled={!isSocketConnected || !newMessage.trim()}
-                                        >
-                                            <Send className="w-4 h-4" />
-                                            <span>Send</span>
-                                        </button>
-                                    </div>
+<div className="space-y-3">
+    {/* File preview */}
+  {selectedFile && (
+    <div className="bg-gray-50 p-3 rounded-lg border">
+        <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+                <span className="text-lg">{getFileIcon(selectedFile.type)}</span>
+                <div>
+                    <p className="text-sm font-medium">{selectedFile.name}</p>
+                    <p className="text-xs text-gray-500">{formatFileSize(selectedFile.size)}</p>
+                </div>
+            </div>
+            <button
+                onClick={() => {
+                    setSelectedFile(null);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                }}
+                className="text-red-500 hover:text-red-700"
+            >
+                <X className="w-4 h-4" />
+            </button>
+        </div>
+        
+        {/* Show image preview if it's an image file */}
+        {isImageFile(selectedFile.type) && (
+            <div className="mt-3">
+                <img
+                    src={URL.createObjectURL(selectedFile)}
+                    alt="Preview"
+                    className="max-w-full max-h-32 rounded border"
+                />
+            </div>
+        )}
+    </div>
+)}
+  
+    {/* Message input row */}
+    <div className="flex space-x-3">
+        <button
+            onClick={() => fileInputRef.current?.click()}
+            className="px-3 py-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors"
+            disabled={!isSocketConnected}
+        >
+            📎
+        </button>
+        <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+            placeholder="Type your message..."
+            className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            disabled={!isSocketConnected}
+        />
+        <button
+            onClick={sendMessage}
+            className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center space-x-2"
+            disabled={!isSocketConnected || (!newMessage.trim() && !selectedFile) || isUploading}
+        >
+            {isUploading ? (
+                <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Sending...</span>
+                </>
+            ) : (
+                <>
+                    <Send className="w-4 h-4" />
+                    <span>Send</span>
+                </>
+            )}
+        </button>
+    </div>
+</div>
                                 </>
                             ) : (
                                 <div className="text-center text-gray-500 h-96 flex items-center justify-center">
@@ -753,6 +910,46 @@ const CommunicationHub = () => {
                         </div>
                     </div>
                 )}
+                {/* Image Preview Modal */}
+{showImagePreview && previewImage && (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div className="relative max-w-4xl max-h-full p-4">
+            {/* Close button */}
+            <button
+                onClick={closeImagePreview}
+                className="absolute top-2 right-2 bg-white bg-opacity-20 text-white rounded-full p-2 hover:bg-opacity-30 transition-colors z-10"
+            >
+                <X className="w-6 h-6" />
+            </button>
+            
+            {/* Image */}
+            <img
+                src={previewImage.url}
+                alt={previewImage.name}
+                className="max-w-full max-h-full rounded-lg shadow-lg"
+                onError={() => {
+                    alert('Failed to load image preview');
+                    closeImagePreview();
+                }}
+            />
+            
+            {/* Image info */}
+            <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-3 py-1 rounded">
+                {previewImage.name}
+            </div>
+            
+            {/* Download button in preview */}
+            <a
+                href={`${API_BASE}/communication/download/${previewImage.url.split('/').pop()}`}
+                download={previewImage.name}
+                className="absolute bottom-2 right-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors"
+            >
+                📥 Download
+            </a>
+        </div>
+    </div>
+)}
+
             </div>
 
             <style jsx>{`
@@ -772,6 +969,7 @@ const CommunicationHub = () => {
                 }
             `}</style>
         </div>
+
     );
 };
 
