@@ -323,7 +323,13 @@ const Sidebar = () => {
                     icon: Stethoscope,
                     label: 'Appointments',
                     roles: ['doctor']
-                }
+                },
+                {
+                    path: '/groups',
+                    icon: Users,
+                    label: 'Groups',
+                    roles: ['doctor']
+                },
             );
         }
 

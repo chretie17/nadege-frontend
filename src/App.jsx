@@ -15,6 +15,7 @@ import AdminAppointments from './pages/AdminAppointment';
 import Reports from './pages/Report';
 import CommunicationHub from './pages/Chat';
 import PatientDashboard from './pages/PatientAppointment';
+import Groups from './pages/Group';
 
 const App = () => {
     const [role, setRole] = useState(localStorage.getItem('role'));
@@ -53,6 +54,7 @@ const App = () => {
                         <Route path="/appointments" element={<PatientDashboard />} />
                         <Route path="/admin-appointments" element={<AdminAppointments />} />
                         <Route path="/manage-users" element={<ManageUsers />} />
+                        <Route path="/groups" element={<Groups/>} />
                     </Routes>
                 </div>
             </div>
