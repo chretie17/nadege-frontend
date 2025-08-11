@@ -104,7 +104,7 @@ const AdminAppointmentsManagement = () => {
     const colors = {
       pending: 'bg-yellow-100 text-yellow-800 border-yellow-300',
       confirmed: 'bg-green-100 text-green-800 border-green-300',
-      completed: 'bg-blue-100 text-blue-800 border-blue-300',
+      completed: 'bg-green-100 text-green-800 border-green-300',
       cancelled: 'bg-red-100 text-red-800 border-red-300',
       no_show: 'bg-gray-100 text-gray-800 border-gray-300'
     };
@@ -239,10 +239,10 @@ const AdminAppointmentsManagement = () => {
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
         {[
-          { label: 'Total', value: stats.total_appointments || 0, color: 'blue', icon: Calendar },
+          { label: 'Total', value: stats.total_appointments || 0, color: 'green', icon: Calendar },
           { label: 'Pending', value: stats.pending_count || 0, color: 'yellow', icon: Clock },
           { label: 'Confirmed', value: stats.confirmed_count || 0, color: 'green', icon: CheckCircle },
-          { label: 'Completed', value: stats.completed_count || 0, color: 'blue', icon: CheckCircle },
+          { label: 'Completed', value: stats.completed_count || 0, color: 'green', icon: CheckCircle },
           { label: 'Cancelled', value: stats.cancelled_count || 0, color: 'red', icon: XCircle }
         ].map((stat, index) => (
           <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
@@ -269,14 +269,14 @@ const AdminAppointmentsManagement = () => {
               placeholder="Search patients, doctors, emails..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className="pl-10 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
             />
           </div>
           
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
@@ -289,7 +289,7 @@ const AdminAppointmentsManagement = () => {
           <select
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
           >
             <option value="all">All Dates</option>
             <option value="today">Today</option>
@@ -303,7 +303,7 @@ const AdminAppointmentsManagement = () => {
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500"
             />
           )}
         </div>
@@ -316,7 +316,7 @@ const AdminAppointmentsManagement = () => {
             <h2 className="text-lg font-semibold">
               Appointments ({filteredAppointments.length})
             </h2>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+            <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center">
               <Download className="w-4 h-4 mr-2" />
               Export
             </button>
@@ -325,7 +325,7 @@ const AdminAppointmentsManagement = () => {
         
         {loading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
             <p className="text-gray-500">Loading appointments...</p>
           </div>
         ) : filteredAppointments.length === 0 ? (
@@ -350,8 +350,8 @@ const AdminAppointmentsManagement = () => {
                   <tr key={appointment.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <User className="h-5 w-5 text-blue-600" />
+                        <div className="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center">
+                          <User className="h-5 w-5 text-green-600" />
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{appointment.patient_name}</div>
@@ -376,7 +376,7 @@ const AdminAppointmentsManagement = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => setShowDetails(appointment)}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-green-600 hover:text-green-900"
                         >
                           <Eye className="w-4 h-4" />
                         </button>

@@ -1,16 +1,40 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import API_URL from '../api';
 import axios from 'axios';
 
 const Login = () => {
-    const [usernameOrEmail, setUsernameOrEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [showMessage, setShowMessage] = useState({ visible: false, text: '', type: 'success' });
+    const [currentView, setCurrentView] = useState('login'); // 'login', 'forgot', 'reset'
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
+    // Login form state
+    const [usernameOrEmail, setUsernameOrEmail] = useState('');
+    const [password, setPassword] = useState('');
+    
+    // Forgot password state
+    const [email, setEmail] = useState('');
+    const [isEmailSent, setIsEmailSent] = useState(false);
+    
+    // Reset password state
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [resetToken, setResetToken] = useState('');
+    
+    // Common state
+    const [isLoading, setIsLoading] = useState(false);
+    const [showMessage, setShowMessage] = useState({ visible: false, text: '', type: 'success' });
+
+    // Check for reset token in URL on component mount
+    useEffect(() => {
+        const token = searchParams.get('token');
+        if (token) {
+            setResetToken(token);
+            setCurrentView('reset');
+        }
+    }, [searchParams]);
+
+    const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         try {
@@ -20,7 +44,6 @@ const Login = () => {
             localStorage.setItem('user', JSON.stringify(response.data.user));
             window.dispatchEvent(new Event('roleChange'));
             
-            // Updated success message based on role
             let welcomeMessage = 'Login successful. Welcome to MedConnect Rwanda!';
             if (response.data.role === 'admin') {
                 welcomeMessage = 'Welcome back, Admin! Ready to manage the system.';
@@ -46,11 +69,369 @@ const Login = () => {
         }
     };
 
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        
+        try {
+            const response = await axios.post(`${API_URL}/users/forgot-password`, { email });
+            displayMessage(response.data.message, 'success');
+            setIsEmailSent(true);
+        } catch (error) {
+            const errorMsg = error.response?.data?.message || 'Failed to send reset email. Please try again.';
+            displayMessage(errorMsg, 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleResetPassword = async (e) => {
+        e.preventDefault();
+        
+        if (newPassword !== confirmPassword) {
+            displayMessage('Passwords do not match!', 'error');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            displayMessage('Password must be at least 6 characters long!', 'error');
+            return;
+        }
+
+        setIsLoading(true);
+        
+        try {
+            const response = await axios.post(`${API_URL}/users/reset-password`, { 
+                token: resetToken, 
+                newPassword 
+            });
+            displayMessage(response.data.message, 'success');
+            
+            setTimeout(() => {
+                setCurrentView('login');
+                // Clear URL parameters
+                navigate('/login', { replace: true });
+            }, 2000);
+        } catch (error) {
+            const errorMsg = error.response?.data?.message || 'Failed to reset password. Please try again.';
+            displayMessage(errorMsg, 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const displayMessage = (text, type = 'success') => {
         setShowMessage({ visible: true, text, type });
         setTimeout(() => {
             setShowMessage({ visible: false, text: '', type: 'success' });
         }, 4000);
+    };
+
+    const resetForm = () => {
+        setUsernameOrEmail('');
+        setPassword('');
+        setEmail('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setIsEmailSent(false);
+        setShowMessage({ visible: false, text: '', type: 'success' });
+    };
+
+    const switchView = (view) => {
+        setCurrentView(view);
+        resetForm();
+        if (view === 'login') {
+            navigate('/login', { replace: true });
+        }
+    };
+
+    const renderLoginForm = () => (
+        <>
+            <h2 className="text-2xl font-bold text-gray-800 mb-1">Welcome Back</h2>
+            <p className="text-gray-500 mb-8">Access your medical collaboration platform</p>
+            
+            <form onSubmit={handleLogin} className="space-y-5">
+                <div>
+                    <label htmlFor="usernameOrEmail" className="block text-sm font-medium text-gray-700 mb-1">
+                        Username or Email
+                    </label>
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <input
+                            id="usernameOrEmail"
+                            type="text"
+                            required
+                            className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                            placeholder="Enter your username or email"
+                            value={usernameOrEmail}
+                            onChange={(e) => setUsernameOrEmail(e.target.value)}
+                        />
+                    </div>
+                </div>
+                
+                <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                        Password
+                    </label>
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <input
+                            id="password"
+                            type="password"
+                            required
+                            className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                        <input
+                            id="remember-me"
+                            name="remember-me"
+                            type="checkbox"
+                            className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                            Remember me
+                        </label>
+                    </div>
+                    <button 
+                        type="button"
+                        onClick={() => switchView('forgot')}
+                        className="text-sm text-green-600 hover:text-green-800 transition-colors"
+                    >
+                        Forgot password?
+                    </button>
+                </div>
+                
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className={`w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg text-white font-medium text-sm
+                        ${isLoading 
+                            ? 'bg-green-400 cursor-not-allowed' 
+                            : 'bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 shadow-md hover:shadow-lg transition-all duration-300'
+                        }`}
+                >
+                    {isLoading ? (
+                        <>
+                            <svg className="animate-spin mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Signing in...
+                        </>
+                    ) : (
+                        <>
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                            </svg>
+                            Sign in to MedConnect
+                        </>
+                    )}
+                </button>
+            </form>
+        </>
+    );
+
+    const renderForgotPasswordForm = () => (
+        <>
+            <div className="mb-4">
+                <button 
+                    onClick={() => switchView('login')}
+                    className="flex items-center text-green-600 hover:text-green-800 transition-colors"
+                >
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back to Login
+                </button>
+            </div>
+
+            {!isEmailSent ? (
+                <>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-1">Reset Password</h2>
+                    <p className="text-gray-500 mb-8">Enter your email address and we'll send you a link to reset your password</p>
+                    
+                    <form onSubmit={handleForgotPassword} className="space-y-5">
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                                Email Address
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                                    </svg>
+                                </div>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    required
+                                    className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                    placeholder="Enter your email address"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className={`w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg text-white font-medium text-sm
+                                ${isLoading 
+                                    ? 'bg-green-400 cursor-not-allowed' 
+                                    : 'bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 shadow-md hover:shadow-lg transition-all duration-300'
+                                }`}
+                        >
+                            {isLoading ? (
+                                <>
+                                    <svg className="animate-spin mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Sending...
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                                    </svg>
+                                    Send Reset Link
+                                </>
+                            )}
+                        </button>
+                    </form>
+                </>
+            ) : (
+                <div className="text-center">
+                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                        <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Check Your Email</h2>
+                    <p className="text-gray-600 mb-6">We've sent a password reset link to <strong>{email}</strong></p>
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => setIsEmailSent(false)}
+                            className="w-full py-2 px-4 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition-colors"
+                        >
+                            Resend Email
+                        </button>
+                        <button
+                            onClick={() => switchView('login')}
+                            className="w-full py-2 px-4 text-gray-600 hover:text-gray-800 transition-colors"
+                        >
+                            Back to Login
+                        </button>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+
+    const renderResetPasswordForm = () => (
+        <>
+            <h2 className="text-2xl font-bold text-gray-800 mb-1">Set New Password</h2>
+            <p className="text-gray-500 mb-8">Create a strong password for your account</p>
+            
+            <form onSubmit={handleResetPassword} className="space-y-5">
+                <div>
+                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                        New Password
+                    </label>
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <input
+                            id="newPassword"
+                            type="password"
+                            required
+                            minLength={6}
+                            className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                            placeholder="Enter new password (min 6 characters)"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                    </div>
+                </div>
+                
+                <div>
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                        Confirm Password
+                    </label>
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <input
+                            id="confirmPassword"
+                            type="password"
+                            required
+                            minLength={6}
+                            className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                            placeholder="Confirm your new password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                    </div>
+                </div>
+                
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className={`w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg text-white font-medium text-sm
+                        ${isLoading 
+                            ? 'bg-green-400 cursor-not-allowed' 
+                            : 'bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 shadow-md hover:shadow-lg transition-all duration-300'
+                        }`}
+                >
+                    {isLoading ? (
+                        <>
+                            <svg className="animate-spin mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Updating Password...
+                        </>
+                    ) : (
+                        <>
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Update Password
+                        </>
+                    )}
+                </button>
+            </form>
+        </>
+    );
+
+    const getCurrentFormTitle = () => {
+        switch (currentView) {
+            case 'forgot': return 'Password Recovery';
+            case 'reset': return 'Password Reset';
+            default: return 'Welcome Back';
+        }
     };
 
     return (
@@ -127,7 +508,7 @@ const Login = () => {
                 </div>
             </div>
             
-            {/* Right side - Login form */}
+            {/* Right side - Dynamic form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-6">
                 <div className="w-full max-w-md">
                     {/* Mobile-only logo */}
@@ -142,108 +523,23 @@ const Login = () => {
                     
                     <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
                         <div className="px-8 pt-8 pb-6">
-                            <h2 className="text-2xl font-bold text-gray-800 mb-1">Welcome Back</h2>
-                            <p className="text-gray-500 mb-8">Access your medical collaboration platform</p>
-                            
-                            <form onSubmit={handleSubmit} className="space-y-5">
-                                <div>
-                                    <label htmlFor="usernameOrEmail" className="block text-sm font-medium text-gray-700 mb-1">
-                                        Username or Email
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                            </svg>
-                                        </div>
-                                        <input
-                                            id="usernameOrEmail"
-                                            type="text"
-                                            required
-                                            className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                                            placeholder="Enter your username or email"
-                                            value={usernameOrEmail}
-                                            onChange={(e) => setUsernameOrEmail(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                                        Password
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                        </div>
-                                        <input
-                                            id="password"
-                                            type="password"
-                                            required
-                                            className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                                            placeholder="Enter your password"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <input
-                                            id="remember-me"
-                                            name="remember-me"
-                                            type="checkbox"
-                                            className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                                        />
-                                        <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                                            Remember me
-                                        </label>
-                                    </div>
-                                    <Link to="/forgot-password" className="text-sm text-green-600 hover:text-green-800 transition-colors">
-                                        Forgot password?
-                                    </Link>
-                                </div>
-                                
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className={`w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg text-white font-medium text-sm
-                                        ${isLoading 
-                                            ? 'bg-green-400 cursor-not-allowed' 
-                                            : 'bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 shadow-md hover:shadow-lg transition-all duration-300'
-                                        }`}
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <svg className="animate-spin mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            Signing in...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                                            </svg>
-                                            Sign in to MedConnect
-                                        </>
-                                    )}
-                                </button>
-                            </form>
+                            {/* Render appropriate form based on current view */}
+                            {currentView === 'login' && renderLoginForm()}
+                            {currentView === 'forgot' && renderForgotPasswordForm()}
+                            {currentView === 'reset' && renderResetPasswordForm()}
                         </div>
                         
-                        <div className="px-8 py-4 bg-gray-50 border-t border-gray-100 text-center">
-                            <p className="text-sm text-gray-600">
-                                Need access to the system? 
-                                <Link to="/" className="ml-1 font-medium text-green-600 hover:text-green-800 transition-colors">
-                                    Contact Administrator
-                                </Link>
-                            </p>
-                        </div>
+                        {/* Footer - only show on login view */}
+                        {currentView === 'login' && (
+                            <div className="px-8 py-4 bg-gray-50 border-t border-gray-100 text-center">
+                                <p className="text-sm text-gray-600">
+                                    Need access to the system? 
+                                    <Link to="/" className="ml-1 font-medium text-green-600 hover:text-green-800 transition-colors">
+                                        Contact Administrator
+                                    </Link>
+                                </p>
+                            </div>
+                        )}
                     </div>
                     
                     <div className="mt-6 text-center">

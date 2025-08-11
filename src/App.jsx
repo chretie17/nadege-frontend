@@ -16,6 +16,11 @@ import Reports from './pages/Report';
 import CommunicationHub from './pages/Chat';
 import PatientDashboard from './pages/PatientAppointment';
 import Groups from './pages/Group';
+import DoctorReportsDashboard from './pages/Doctor-Report';
+import SimplePasswordReset from './pages/reset-password';
+import { useLocation } from 'react-router-dom';
+import ClinicalResourcesPage from './pages/Resources';
+
 
 const App = () => {
     const [role, setRole] = useState(localStorage.getItem('role'));
@@ -29,6 +34,13 @@ const App = () => {
             window.removeEventListener('roleChange', handleRoleChange);
         };
     }, []);
+    const PasswordResetWrapper = () => {
+    const location = useLocation();
+    const urlParams = new URLSearchParams(location.search);
+    const token = urlParams.get('token') || ''; // no demo token
+    return <SimplePasswordReset token={token} />;
+};
+
 
     return (
         <BrowserRouter>
@@ -54,7 +66,11 @@ const App = () => {
                         <Route path="/appointments" element={<PatientDashboard />} />
                         <Route path="/admin-appointments" element={<AdminAppointments />} />
                         <Route path="/manage-users" element={<ManageUsers />} />
+                        <Route path="/doctor-reports" element={<DoctorReportsDashboard />} />
                         <Route path="/groups" element={<Groups/>} />
+                        <Route path="/reset-password" element={<PasswordResetWrapper />} />
+                        <Route path="/resources" element={<ClinicalResourcesPage />} />
+
                     </Routes>
                 </div>
             </div>

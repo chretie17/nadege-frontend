@@ -325,6 +325,18 @@ const Sidebar = () => {
                     roles: ['doctor']
                 },
                 {
+                    path: '/doctor-reports',
+                    icon: FileText,
+                    label: 'Your Reports',
+                    roles: ['doctor']
+                },
+                {
+                    path: '/resources',
+                    icon: Users,
+                    label: 'Resources',
+                    roles: ['doctor']
+                },
+                {
                     path: '/groups',
                     icon: Users,
                     label: 'Groups',
