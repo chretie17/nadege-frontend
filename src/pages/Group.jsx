@@ -91,29 +91,29 @@ const Groups = () => {
     };
 
     const handleCreateGroup = async () => {
-        if (!newGroupName.trim()) {
-            showMessage('Group name is required', 'error');
-            return;
-        }
+    if (!newGroupName.trim()) {
+        showMessage('Group name is required', 'error');
+        return;
+    }
+    
+    try {
+        await axios.post(`${API_URL}/groups`, {
+            name: newGroupName,
+            description: newGroupDescription,
+            privacy: "public", // Always set to public instead of newGroupPrivacy
+            category: newGroupCategory,
+            created_by: user_id
+        });
         
-        try {
-            await axios.post(`${API_URL}/groups`, {
-                name: newGroupName,
-                description: newGroupDescription,
-                privacy: newGroupPrivacy,
-                category: newGroupCategory,
-                created_by: user_id
-            });
-            
-            setOpenNewGroupDialog(false);
-            resetGroupForm();
-            showMessage('Group created successfully');
-            fetchData();
-        } catch (error) {
-            console.error('Error creating group:', error);
-            showMessage('Failed to create group. Please try again.', 'error');
-        }
-    };
+        setOpenNewGroupDialog(false);
+        resetGroupForm();
+        showMessage('Group created successfully');
+        fetchData();
+    } catch (error) {
+        console.error('Error creating group:', error);
+        showMessage('Failed to create group. Please try again.', 'error');
+    }
+};
 
     const handleJoinGroup = async (groupId) => {
         try {
@@ -753,96 +753,85 @@ const Groups = () => {
             </div>
 
             {/* Create Group Dialog */}
-            <Dialog 
-                open={openNewGroupDialog} 
-                onClose={() => setOpenNewGroupDialog(false)}
-                maxWidth="md"
-                fullWidth
-                PaperProps={{ style: { borderRadius: '0.75rem' } }}
-            >
-                <DialogTitle>
-                    <div className="flex items-center text-green-800">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        Create New Group
-                    </div>
-                </DialogTitle>
-                <DialogContent>
-                    <div className="bg-green-50 p-4 rounded-lg mb-4 text-green-700 text-sm">
-                        <p>Create a space for like-minded individuals to connect, share knowledge, and support each other.</p>
-                    </div>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Group Name"
-                        type="text"
-                        fullWidth
-                        value={newGroupName}
-                        onChange={(e) => setNewGroupName(e.target.value)}
-                        required
-                        variant="outlined"
-                        className="mb-4"
-                        InputProps={{ style: { borderRadius: '0.5rem' } }}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Description"
-                        type="text"
-                        fullWidth
-                        multiline
-                        rows={3}
-                        value={newGroupDescription}
-                        onChange={(e) => setNewGroupDescription(e.target.value)}
-                        variant="outlined"
-                        className="mb-4"
-                        placeholder="Describe the purpose and goals of your group"
-                        InputProps={{ style: { borderRadius: '0.5rem' } }}
-                    />
-                    <div className="flex space-x-4 mb-4">
-                        <FormControl fullWidth>
-                            <InputLabel>Category</InputLabel>
-                            <Select
-                                value={newGroupCategory}
-                                onChange={(e) => setNewGroupCategory(e.target.value)}
-                                label="Category"
-                            >
-                                <MenuItem value="">Select Category</MenuItem>
-                                {categories.map(category => (
-                                    <MenuItem key={category} value={category}>{category}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <FormControl fullWidth>
-                            <InputLabel>Privacy</InputLabel>
-                            <Select
-                                value={newGroupPrivacy}
-                                onChange={(e) => setNewGroupPrivacy(e.target.value)}
-                                label="Privacy"
-                            >
-                                <MenuItem value="public">Public-Group</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </div>
-                </DialogContent>
-                <DialogActions style={{ padding: '16px 24px' }}>
-                    <Button 
-                        onClick={() => setOpenNewGroupDialog(false)}
-                        style={{ textTransform: 'none', borderRadius: '0.5rem', padding: '8px 16px' }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button 
-                        onClick={handleCreateGroup} 
-                        variant="contained" 
-                        className="bg-green-600 hover:bg-green-700"
-                        style={{ textTransform: 'none', borderRadius: '0.5rem', padding: '8px 16px' }}
-                    >
-                        Create Group
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
+<Dialog 
+    open={openNewGroupDialog} 
+    onClose={() => setOpenNewGroupDialog(false)}
+    maxWidth="md"
+    fullWidth
+    PaperProps={{ style: { borderRadius: '0.75rem' } }}
+>
+    <DialogTitle>
+        <div className="flex items-center text-green-800">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Create New Group
+        </div>
+    </DialogTitle>
+    <DialogContent>
+        <div className="bg-green-50 p-4 rounded-lg mb-4 text-green-700 text-sm">
+            <p>Create a space for like-minded individuals to connect, share knowledge, and support each other.</p>
+        </div>
+        <TextField
+            autoFocus
+            margin="dense"
+            label="Group Name"
+            type="text"
+            fullWidth
+            value={newGroupName}
+            onChange={(e) => setNewGroupName(e.target.value)}
+            required
+            variant="outlined"
+            className="mb-4"
+            InputProps={{ style: { borderRadius: '0.5rem' } }}
+        />
+        <TextField
+            margin="dense"
+            label="Description"
+            type="text"
+            fullWidth
+            multiline
+            rows={3}
+            value={newGroupDescription}
+            onChange={(e) => setNewGroupDescription(e.target.value)}
+            variant="outlined"
+            className="mb-4"
+            placeholder="Describe the purpose and goals of your group"
+            InputProps={{ style: { borderRadius: '0.5rem' } }}
+        />
+        <div className="mb-4">
+            <FormControl fullWidth>
+                <InputLabel>Category</InputLabel>
+                <Select
+                    value={newGroupCategory}
+                    onChange={(e) => setNewGroupCategory(e.target.value)}
+                    label="Category"
+                >
+                    <MenuItem value="">Select Category</MenuItem>
+                    {categories.map(category => (
+                        <MenuItem key={category} value={category}>{category}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+        </div>
+    </DialogContent>
+    <DialogActions style={{ padding: '16px 24px' }}>
+        <Button 
+            onClick={() => setOpenNewGroupDialog(false)}
+            style={{ textTransform: 'none', borderRadius: '0.5rem', padding: '8px 16px' }}
+        >
+            Cancel
+        </Button>
+        <Button 
+            onClick={handleCreateGroup} 
+            variant="contained" 
+            className="bg-green-600 hover:bg-green-700"
+            style={{ textTransform: 'none', borderRadius: '0.5rem', padding: '8px 16px' }}
+        >
+            Create Group
+        </Button>
+    </DialogActions>
+</Dialog>
             {/* Create Post Dialog */}
             <Dialog 
                 open={openNewPostDialog} 
