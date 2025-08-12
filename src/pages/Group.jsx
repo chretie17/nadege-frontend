@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import moment from 'moment';
 
+
 const Groups = () => {
     const [loading, setLoading] = useState(true);
     const [groups, setGroups] = useState([]);
@@ -401,15 +402,7 @@ const Groups = () => {
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <div className="flex items-center text-gray-500">
-                                                                {group.privacy === 'private' && (
-                                                                    <Tooltip title="Private Group">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                                                                        </svg>
-                                                                    </Tooltip>
-                                                                )}
-                                                            </div>
+                                                         
                                                         </div>
                                                         
                                                         <p className="text-gray-600 mb-4 line-clamp-2">{group.description || 'No description available'}</p>
@@ -597,14 +590,7 @@ const Groups = () => {
                                                         style={{ backgroundColor: '#e3f2fd', color: '#1976d2' }}
                                                     />
                                                 )}
-                                                {currentGroup.privacy === 'private' && (
-                                                    <Chip 
-                                                        label="Private" 
-                                                        size="small"
-                                                        icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>}
-                                                        style={{ backgroundColor: '#fff3e0', color: '#f57c00' }}
-                                                    />
-                                                )}
+                                              
                                             </div>
                                         </div>
                                     </div>
@@ -834,8 +820,7 @@ const Groups = () => {
                                 onChange={(e) => setNewGroupPrivacy(e.target.value)}
                                 label="Privacy"
                             >
-                                <MenuItem value="public">Public - Anyone can join</MenuItem>
-                                <MenuItem value="private">Private - Approval required</MenuItem>
+                                <MenuItem value="public">Public-Group</MenuItem>
                             </Select>
                         </FormControl>
                     </div>

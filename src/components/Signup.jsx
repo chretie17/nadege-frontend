@@ -125,46 +125,8 @@ const Register = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="relative">
-                                <input 
-                                    type="text" 
-                                    name="skills" 
-                                    placeholder="Skills (comma-separated)" 
-                                    value={formData.skills} 
-                                    onChange={handleChange} 
-                                    required 
-                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-300 ease-in-out"
-                                />
-                                <span className="absolute top-0 left-0 transform -translate-y-1/2 translate-x-4 bg-white px-2 text-xs text-gray-500">Skills</span>
-                            </div>
-                            <div className="relative">
-                                <input 
-                                    type="text" 
-                                    name="experience" 
-                                    placeholder="Experience" 
-                                    value={formData.experience} 
-                                    onChange={handleChange} 
-                                    required 
-                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-300 ease-in-out"
-                                />
-                                <span className="absolute top-0 left-0 transform -translate-y-1/2 translate-x-4 bg-white px-2 text-xs text-gray-500">Experience</span>
-                            </div>
-                        </div>
-
-                        <div className="relative">
-                            <input 
-                                type="text" 
-                                name="education" 
-                                placeholder="Education" 
-                                value={formData.education} 
-                                onChange={handleChange} 
-                                required 
-                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-300 ease-in-out"
-                            />
-                            <span className="absolute top-0 left-0 transform -translate-y-1/2 translate-x-4 bg-white px-2 text-xs text-gray-500">Education</span>
-                        </div>
-
+                      
+                      
                         <button 
                             type="submit" 
                             className="w-full bg-gradient-to-r from-green-600 to-green-400 text-white font-bold py-3 rounded-lg hover:from-green-700 hover:to-green-500 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"

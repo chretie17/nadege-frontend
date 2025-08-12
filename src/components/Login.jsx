@@ -15,7 +15,8 @@ const Login = () => {
     // Forgot password state
     const [email, setEmail] = useState('');
     const [isEmailSent, setIsEmailSent] = useState(false);
-    
+    const [showPassword, setShowPassword] = useState(false);
+
     // Reset password state
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -183,15 +184,24 @@ const Login = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                         </div>
-                        <input
-                            id="password"
-                            type="password"
-                            required
-                            className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
+                       <div className="relative">
+    <input
+        id="password"
+        type={showPassword ? "text" : "password"}
+        required
+        className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+        placeholder="Enter your password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+    />
+    <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+    >
+        {showPassword ? "🙈" : "👁️"}
+    </button>
+</div>
                     </div>
                 </div>
                 
