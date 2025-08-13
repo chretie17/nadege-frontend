@@ -10,16 +10,19 @@ class PDFReportGenerator {
     this.pageHeight = 0;
     this.yPosition = 20;
     this.colors = {
-      primary: [20, 83, 45],      // Deep forest green
-      secondary: [34, 139, 34],   // Forest green
-      accent: [46, 125, 50],      // Medium green
-      light: [200, 230, 201],     // Light green
-      lighter: [232, 245, 233],   // Very light green
-      dark: [27, 94, 32],         // Dark green
-      text: [33, 37, 41],         // Dark gray
-      muted: [108, 117, 125],     // Muted gray
-      white: [255, 255, 255],     // White
-      background: [248, 249, 250] // Light background
+      primary: [0, 77, 64],        // Dark teal green
+      secondary: [26, 121, 99],    // Medium dark green
+      accent: [46, 125, 50],       // Medium green
+      light: [165, 214, 167],      // Light green
+      lighter: [200, 230, 201],    // Very light green
+      dark: [0, 60, 48],           // Very dark green
+      text: [33, 37, 41],          // Dark gray
+      muted: [108, 117, 125],      // Muted gray
+      white: [255, 255, 255],      // White
+      background: [248, 249, 250], // Light background
+      tableHeader: [0, 77, 64],    // Dark green header
+      tableBorder: [165, 214, 167], // Light green border
+      tableAltRow: [232, 245, 233]  // Very light green alternate row
     };
   }
 
@@ -66,7 +69,7 @@ class PDFReportGenerator {
 
   // Add clean header with logo
   async addHeader(reportName) {
-    // Try to load the main logo (only one logo)
+    // Try to load the main logo
     try {
       const base64Logo = await this.loadImageAsBase64(logoImage);
       this.doc.addImage(base64Logo, 'JPEG', 15, 15, 30, 30);
@@ -111,31 +114,49 @@ class PDFReportGenerator {
     this.doc.text(text, x + (width - textWidth)/2, y + height/2 + 2);
   }
 
-  // Add clean table section
+  // Add section title before tables
+  addSectionTitle(title) {
+    if (this.yPosition + 20 > this.pageHeight - 30) {
+      this.doc.addPage();
+      this.yPosition = 20;
+    }
+
+    // Add some space before section
+    this.yPosition += 10;
+    
+    // Section title with underline
+    this.doc.setFontSize(14);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(...this.colors.primary);
+    this.doc.text(title, 20, this.yPosition);
+    
+    // Add subtle underline
+    const titleWidth = this.doc.getTextWidth(title);
+    this.doc.setDrawColor(...this.colors.primary);
+    this.doc.setLineWidth(0.5);
+    this.doc.line(20, this.yPosition + 2, 20 + titleWidth, this.yPosition + 2);
+    
+    this.yPosition += 15;
+  }
+
+  // Enhanced table with professional styling
   addTable(title, headers, rows, description = '') {
     if (!title || !headers || !Array.isArray(headers)) {
       console.warn('Invalid table parameters:', { title, headers, rows });
       return;
     }
     
+    // Add section title
+    this.addSectionTitle(title);
+    
     if (this.yPosition + 40 > this.pageHeight - 30) {
       this.doc.addPage();
       this.yPosition = 20;
     }
     
-    this.doc.setTextColor(...this.colors.text);
-    
+    // Handle empty data
     if (!rows || rows.length === 0) {
-      // No data message
-      this.doc.setFillColor(...this.colors.lighter);
-      this.doc.setDrawColor(...this.colors.light);
-      this.doc.roundedRect(20, this.yPosition - 5, this.pageWidth - 40, 20, 2, 2, 'FD');
-      
-      this.doc.setFontSize(11);
-      this.doc.setFont('helvetica', 'italic');
-      this.doc.setTextColor(...this.colors.muted);
-      this.doc.text('No data available for this report section.', 30, this.yPosition + 5);
-      this.yPosition += 25;
+      this.addEmptyDataMessage();
       return;
     }
     
@@ -147,98 +168,226 @@ class PDFReportGenerator {
       })
     ).filter(row => row.length > 0);
     
-    // Use autoTable with clean styling
+    // Calculate optimal column widths
+    const columnWidths = this.calculateColumnWidths(headers, cleanRows);
+    
     try {
       this.doc.autoTable({
         head: [headers],
         body: cleanRows,
         startY: this.yPosition,
         margin: { left: 20, right: 20 },
+        tableWidth: 'auto',
+        columnStyles: this.generateColumnStyles(headers.length, columnWidths),
+        
+        // Enhanced styling
         styles: {
-          fontSize: 10,
-          cellPadding: 6,
+          fontSize: 9,
+          cellPadding: { top: 8, right: 6, bottom: 8, left: 6 },
           font: 'helvetica',
           textColor: this.colors.text,
-          lineColor: [128, 128, 128],
-          lineWidth: 0.5,
+          lineColor: this.colors.tableBorder,
+          lineWidth: 0.1,
           overflow: 'linebreak',
           cellWidth: 'wrap',
-          valign: 'middle'
+          valign: 'middle',
+          minCellHeight: 12
         },
+        
+        // Professional header styling
         headStyles: {
-          fillColor: [240, 240, 240],
-          textColor: this.colors.text,
+          fillColor: this.colors.tableHeader,
+          textColor: this.colors.white,
           fontStyle: 'bold',
-          fontSize: 11,
-          cellPadding: 8,
-          halign: 'center'
+          fontSize: 10,
+          cellPadding: { top: 10, right: 6, bottom: 10, left: 6 },
+          halign: 'center',
+          valign: 'middle',
+          minCellHeight: 15
         },
+        
+        // Clean alternating rows
         alternateRowStyles: {
-          fillColor: [250, 250, 250],
+          fillColor: this.colors.tableAltRow
         },
+        
+        // Default row styling
         rowStyles: {
-          fillColor: this.colors.white,
+          fillColor: this.colors.white
         },
-        tableLineColor: [128, 128, 128],
-        tableLineWidth: 0.5,
-        columnStyles: {
-          0: { halign: 'center' },
-          1: { halign: 'center' },
-          2: { halign: 'center' },
-          3: { halign: 'center' },
-          4: { halign: 'center' },
-          5: { halign: 'center' }
-        }
+        
+        // Clean table borders
+        tableLineColor: this.colors.tableBorder,
+        tableLineWidth: 0.3,
+        
+        // Enhanced table appearance
+        theme: 'grid',
+        
+        // Custom drawing hooks for enhanced styling
+        didDrawCell: (data) => {
+          // Add subtle shadow effect to headers
+          if (data.section === 'head') {
+            this.doc.setDrawColor(200, 200, 200);
+            this.doc.setLineWidth(0.1);
+            this.doc.line(
+              data.cell.x, 
+              data.cell.y + data.cell.height, 
+              data.cell.x + data.cell.width, 
+              data.cell.y + data.cell.height + 0.5
+            );
+          }
+        },
+        
+        // Better page break handling
+        showHead: 'everyPage',
+        pageBreak: 'auto',
+        rowPageBreak: 'avoid'
       });
       
-      this.yPosition = this.doc.lastAutoTable.finalY + 30;
+      this.yPosition = this.doc.lastAutoTable.finalY + 25;
+      
+      // Add description if provided
+      if (description) {
+        this.addTableDescription(description);
+      }
+      
     } catch (error) {
-      console.warn('AutoTable failed, using fallback:', error);
-      this.addTableFallback(title, headers, cleanRows);
+      console.warn('AutoTable failed, using enhanced fallback:', error);
+      this.addEnhancedTableFallback(title, headers, cleanRows);
     }
   }
 
-  // Fallback table method
-  addTableFallback(title, headers, rows) {
+  // Calculate optimal column widths based on content
+  calculateColumnWidths(headers, rows) {
+    const columnWidths = {};
+    const totalWidth = this.pageWidth - 40; // Account for margins
+    
+    headers.forEach((header, index) => {
+      let maxWidth = this.doc.getTextWidth(header) + 10; // Header width + padding
+      
+      // Check content width
+      rows.forEach(row => {
+        if (row[index]) {
+          const cellWidth = this.doc.getTextWidth(row[index].toString()) + 10;
+          maxWidth = Math.max(maxWidth, cellWidth);
+        }
+      });
+      
+      // Set reasonable limits
+      maxWidth = Math.min(maxWidth, totalWidth / headers.length * 1.5);
+      maxWidth = Math.max(maxWidth, totalWidth / headers.length * 0.7);
+      
+      columnWidths[index] = maxWidth;
+    });
+    
+    return columnWidths;
+  }
+
+  // Generate column styles based on content type
+  generateColumnStyles(columnCount, columnWidths) {
+    const styles = {};
+    
+    for (let i = 0; i < columnCount; i++) {
+      styles[i] = {
+        cellWidth: columnWidths[i] || 'auto',
+        halign: this.getColumnAlignment(i, columnCount)
+      };
+    }
+    
+    return styles;
+  }
+
+  // Smart column alignment based on position and content
+  getColumnAlignment(columnIndex, totalColumns) {
+    // First column (usually names/identifiers) - left align
+    if (columnIndex === 0) return 'left';
+    
+    // Last column (usually status/actions) - center align
+    if (columnIndex === totalColumns - 1) return 'center';
+    
+    // Middle columns (usually numbers/data) - center align
+    return 'center';
+  }
+
+  // Enhanced empty data message
+  addEmptyDataMessage() {
+    this.doc.setFillColor(...this.colors.lighter);
+    this.doc.setDrawColor(...this.colors.light);
+    this.doc.setLineWidth(0.5);
+    this.doc.roundedRect(20, this.yPosition - 5, this.pageWidth - 40, 25, 3, 3, 'FD');
+    
+    // Icon-like indicator
+    this.doc.setFillColor(...this.colors.muted);
+    this.doc.circle(35, this.yPosition + 7, 3, 'F');
+    this.doc.setTextColor(...this.colors.white);
+    this.doc.setFontSize(8);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('!', 34, this.yPosition + 9);
+    
+    // Message text
+    this.doc.setFontSize(11);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.setTextColor(...this.colors.muted);
+    this.doc.text('No data available for this report section', 45, this.yPosition + 9);
+    
+    this.yPosition += 35;
+  }
+
+  // Add description text below table
+  addTableDescription(description) {
+    this.doc.setFontSize(9);
+    this.doc.setFont('helvetica', 'italic');
+    this.doc.setTextColor(...this.colors.muted);
+    
+    const lines = this.doc.splitTextToSize(description, this.pageWidth - 50);
+    lines.forEach((line, index) => {
+      this.doc.text(line, 25, this.yPosition + (index * 5));
+    });
+    
+    this.yPosition += lines.length * 5 + 10;
+  }
+
+  // Enhanced fallback table method
+  addEnhancedTableFallback(title, headers, rows) {
     if (this.yPosition + 30 > this.pageHeight - 30) {
       this.doc.addPage();
       this.yPosition = 20;
     }
     
     if (!rows || rows.length === 0) {
-      this.doc.setFontSize(11);
-      this.doc.setFont('helvetica', 'italic');
-      this.doc.setTextColor(...this.colors.muted);
-      this.doc.text('No data available for this report section.', 20, this.yPosition);
-      this.yPosition += 20;
+      this.addEmptyDataMessage();
       return;
     }
     
-    const rowHeight = 12;
+    const rowHeight = 14;
     const colWidth = (this.pageWidth - 40) / headers.length;
     
-    // Header
-    this.doc.setFillColor(240, 240, 240);
-    this.doc.setDrawColor(128, 128, 128);
-    this.doc.setLineWidth(0.5);
-    this.doc.rect(20, this.yPosition - 4, this.pageWidth - 40, rowHeight, 'FD');
+    // Enhanced header with gradient effect
+    this.doc.setFillColor(...this.colors.tableHeader);
+    this.doc.setDrawColor(...this.colors.tableBorder);
+    this.doc.setLineWidth(0.3);
+    this.doc.roundedRect(20, this.yPosition - 4, this.pageWidth - 40, rowHeight, 2, 2, 'FD');
     
-    this.doc.setTextColor(...this.colors.text);
-    this.doc.setFontSize(11);
+    // Header shadow
+    this.doc.setFillColor(200, 200, 200);
+    this.doc.roundedRect(20, this.yPosition - 4 + rowHeight, this.pageWidth - 40, 1, 0, 0, 'F');
+    
+    this.doc.setTextColor(...this.colors.white);
+    this.doc.setFontSize(10);
     this.doc.setFont('helvetica', 'bold');
     
     headers.forEach((header, index) => {
-      const headerText = header.length > 15 ? header.substring(0, 12) + '...' : header;
+      const headerText = header.length > 18 ? header.substring(0, 15) + '...' : header;
       const textWidth = this.doc.getTextWidth(headerText);
-      this.doc.text(headerText, 25 + (index * colWidth) + (colWidth - textWidth) / 2, this.yPosition + 4);
+      this.doc.text(headerText, 25 + (index * colWidth) + (colWidth - textWidth) / 2, this.yPosition + 5);
     });
     
-    this.yPosition += rowHeight + 2;
+    this.yPosition += rowHeight + 3;
     
-    // Data rows
+    // Enhanced data rows
     this.doc.setTextColor(...this.colors.text);
     this.doc.setFont('helvetica', 'normal');
-    this.doc.setFontSize(10);
+    this.doc.setFontSize(9);
     
     rows.forEach((row, rowIndex) => {
       if (this.yPosition + rowHeight > this.pageHeight - 30) {
@@ -246,22 +395,27 @@ class PDFReportGenerator {
         this.yPosition = 20;
       }
       
-      // Alternating row colors
+      // Alternating row colors with rounded corners for better visual separation
       if (rowIndex % 2 === 1) {
-        this.doc.setFillColor(250, 250, 250);
-        this.doc.rect(20, this.yPosition - 2, this.pageWidth - 40, rowHeight, 'F');
+        this.doc.setFillColor(...this.colors.tableAltRow);
+        this.doc.roundedRect(20, this.yPosition - 2, this.pageWidth - 40, rowHeight, 1, 1, 'F');
+      } else {
+        this.doc.setFillColor(...this.colors.white);
+        this.doc.roundedRect(20, this.yPosition - 2, this.pageWidth - 40, rowHeight, 1, 1, 'F');
       }
       
-      // Row border
-      this.doc.setDrawColor(128, 128, 128);
-      this.doc.setLineWidth(0.3);
-      this.doc.rect(20, this.yPosition - 2, this.pageWidth - 40, rowHeight, 'D');
+      // Subtle row border
+      this.doc.setDrawColor(...this.colors.tableBorder);
+      this.doc.setLineWidth(0.1);
+      this.doc.roundedRect(20, this.yPosition - 2, this.pageWidth - 40, rowHeight, 1, 1, 'D');
       
       row.forEach((cell, colIndex) => {
         const cleanCell = cell.toString().replace(/<[^>]*>/g, '');
-        const truncatedCell = cleanCell.length > 20 ? cleanCell.substring(0, 17) + '...' : cleanCell;
+        const truncatedCell = cleanCell.length > 22 ? cleanCell.substring(0, 19) + '...' : cleanCell;
         const textWidth = this.doc.getTextWidth(truncatedCell);
-        this.doc.text(truncatedCell, 25 + (colIndex * colWidth) + (colWidth - textWidth) / 2, this.yPosition + 6);
+        const xPos = 25 + (colIndex * colWidth) + (colWidth - textWidth) / 2;
+        
+        this.doc.text(truncatedCell, xPos, this.yPosition + 7);
       });
       
       this.yPosition += rowHeight;
@@ -277,11 +431,21 @@ class PDFReportGenerator {
       this.yPosition = 20;
     }
     
-    // Add some space before configuration
-    this.yPosition += 20;
+    // Add separator line
+    this.doc.setDrawColor(...this.colors.light);
+    this.doc.setLineWidth(0.5);
+    this.doc.line(20, this.yPosition + 10, this.pageWidth - 20, this.yPosition + 10);
+    
+    this.yPosition += 25;
+    
+    // Configuration box with subtle background
+    this.doc.setFillColor(...this.colors.background);
+    this.doc.setDrawColor(...this.colors.tableBorder);
+    this.doc.setLineWidth(0.3);
+    this.doc.roundedRect(20, this.yPosition - 5, this.pageWidth - 40, 25, 3, 3, 'FD');
     
     // Configuration content
-    this.doc.setFontSize(10);
+    this.doc.setFontSize(9);
     this.doc.setFont('helvetica', 'normal');
     this.doc.setTextColor(...this.colors.text);
     
@@ -295,31 +459,44 @@ class PDFReportGenerator {
       second: '2-digit'
     });
     
-    // Left aligned configuration info
-    this.doc.text(`Downloaded by: Admin`, 20, this.yPosition);
-    this.doc.text(`On: ${dateString}`, 20, this.yPosition + 6);
+    this.doc.text(`Generated by: Admin User`, 30, this.yPosition + 5);
+    this.doc.text(`Generated on: ${dateString}`, 30, this.yPosition + 12);
     
-    this.yPosition += 20;
+    this.yPosition += 30;
   }
 
-  // Add footer to all pages
+  // Add enhanced footer to all pages
   addFooters() {
     const pageCount = this.doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       this.doc.setPage(i);
       
-      // Simple footer line
-      this.doc.setDrawColor(...this.colors.light);
-      this.doc.setLineWidth(0.3);
+      // Professional footer line with gradient effect
+      this.doc.setDrawColor(...this.colors.tableBorder);
+      this.doc.setLineWidth(0.5);
       this.doc.line(20, this.pageHeight - 20, this.pageWidth - 20, this.pageHeight - 20);
       
-      // Page number - centered
-      this.doc.setFontSize(9);
+      // Lighter secondary line
+      this.doc.setDrawColor(...this.colors.light);
+      this.doc.setLineWidth(0.2);
+      this.doc.line(20, this.pageHeight - 19, this.pageWidth - 20, this.pageHeight - 19);
+      
+      // Page number with better typography
+      this.doc.setFontSize(8);
       this.doc.setFont('helvetica', 'normal');
       this.doc.setTextColor(...this.colors.muted);
-      const pageText = `${i} of ${pageCount}`;
+      const pageText = `Page ${i} of ${pageCount}`;
       const pageTextWidth = this.doc.getTextWidth(pageText);
-      this.doc.text(pageText, (this.pageWidth - pageTextWidth) / 2, this.pageHeight - 10);
+      this.doc.text(pageText, (this.pageWidth - pageTextWidth) / 2, this.pageHeight - 12);
+      
+      // Company/brand text on left
+      this.doc.setFontSize(7);
+      this.doc.text('MedConnect Healthcare System', 20, this.pageHeight - 12);
+      
+      // Generated timestamp on right
+      const timestamp = new Date().toLocaleDateString();
+      const timestampWidth = this.doc.getTextWidth(timestamp);
+      this.doc.text(timestamp, this.pageWidth - 20 - timestampWidth, this.pageHeight - 12);
     }
   }
 
@@ -336,7 +513,8 @@ class PDFReportGenerator {
         role.count > 0 ? 'Active' : 'Inactive'
       ]);
       
-      this.addTable('Users by Role Distribution', roleHeaders, roleRows);
+      this.addTable('User Role Distribution', roleHeaders, roleRows, 
+        'Overview of user distribution across different system roles and their current status.');
     }
     
     // Recent Users
@@ -350,7 +528,8 @@ class PDFReportGenerator {
         'Active'
       ]);
       
-      this.addTable('Recent User Registrations', userHeaders, userRows);
+      this.addTable('Recent User Registrations', userHeaders, userRows,
+        'Latest user registrations in the system, showing the most recent 15 entries.');
     }
     
     // Doctor Profile Completeness
@@ -364,7 +543,8 @@ class PDFReportGenerator {
         doctor.completeness_score >= 3 ? 'Complete' : doctor.completeness_score >= 2 ? 'Partial' : 'Incomplete'
       ]);
       
-      this.addTable('Doctor Profile Completeness Analysis', doctorHeaders, doctorRows);
+      this.addTable('Doctor Profile Completeness Analysis', doctorHeaders, doctorRows,
+        'Analysis of doctor profile completeness based on required information fields.');
     }
   }
 
@@ -381,7 +561,8 @@ class PDFReportGenerator {
         `${doctor.completion_rate}%`
       ]);
       
-      this.addTable('Doctor Performance Analysis', perfHeaders, perfRows);
+      this.addTable('Doctor Performance Metrics', perfHeaders, perfRows,
+        'Performance analysis showing appointment volumes and completion rates by doctor.');
     }
     
     // Appointments by Specialization
@@ -394,7 +575,8 @@ class PDFReportGenerator {
         `${((spec.appointment_count / total) * 100).toFixed(1)}%`
       ]);
       
-      this.addTable('Appointments by Medical Specialization', specHeaders, specRows);
+      this.addTable('Appointments by Medical Specialization', specHeaders, specRows,
+        'Distribution of appointments across different medical specializations.');
     }
   }
 
@@ -413,7 +595,8 @@ class PDFReportGenerator {
         ];
       });
       
-      this.addTable('Doctor Availability Overview', availHeaders, availRows);
+      this.addTable('Doctor Availability Overview', availHeaders, availRows,
+        'Current availability status for all doctors showing open and total appointment slots.');
     }
     
     // Availability by Day
@@ -429,7 +612,8 @@ class PDFReportGenerator {
         ];
       });
       
-      this.addTable('Weekly Availability Pattern', dayHeaders, dayRows);
+      this.addTable('Weekly Availability Pattern', dayHeaders, dayRows,
+        'Weekly availability patterns showing slot distribution across different days.');
     }
   }
 
@@ -445,7 +629,8 @@ class PDFReportGenerator {
         user.topics_participated
       ]);
       
-      this.addTable('Most Engaged Community Members', engagedHeaders, engagedRows);
+      this.addTable('Most Engaged Community Members', engagedHeaders, engagedRows,
+        'Top community contributors based on post count and topic participation.');
     }
     
     // Success Stories Statistics
@@ -458,7 +643,8 @@ class PDFReportGenerator {
         ['Anonymous Stories', data.successStories.anonymous_stories || 0, 'Anonymous']
       ];
       
-      this.addTable('Success Stories Statistics', storyHeaders, storyRows);
+      this.addTable('Success Stories Statistics', storyHeaders, storyRows,
+        'Overview of success stories in the community platform by approval status.');
     }
   }
 
@@ -481,11 +667,8 @@ class PDFReportGenerator {
       await this.addHeader(reportName);
       
       // Generate content based on report type
-              if (!reportData) {
-        this.doc.setFontSize(16);
-        this.doc.setFont('helvetica', 'bold');
-        this.doc.setTextColor(...this.colors.muted);
-        this.doc.text('No data available for this report.', 20, this.yPosition);
+      if (!reportData) {
+        this.addEmptyDataMessage();
       } else {
         switch (reportType) {
           case 'user-overview':
