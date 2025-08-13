@@ -186,54 +186,60 @@ class PDFReportGenerator {
           cellPadding: { top: 8, right: 6, bottom: 8, left: 6 },
           font: 'helvetica',
           textColor: this.colors.text,
-          lineColor: this.colors.tableBorder,
-          lineWidth: 0.1,
+          lineColor: this.colors.primary,
+          lineWidth: 0.8,
           overflow: 'linebreak',
           cellWidth: 'wrap',
           valign: 'middle',
           minCellHeight: 12
         },
         
-        // Professional header styling
+        // Professional header styling with dark green background
         headStyles: {
-          fillColor: this.colors.tableHeader,
+          fillColor: this.colors.primary,
           textColor: this.colors.white,
           fontStyle: 'bold',
           fontSize: 10,
           cellPadding: { top: 10, right: 6, bottom: 10, left: 6 },
           halign: 'center',
           valign: 'middle',
-          minCellHeight: 15
+          minCellHeight: 15,
+          lineColor: this.colors.primary,
+          lineWidth: 0.8
         },
         
-        // Clean alternating rows
+        // Clean alternating rows with white background
         alternateRowStyles: {
-          fillColor: this.colors.tableAltRow
+          fillColor: this.colors.white,
+          lineColor: this.colors.primary,
+          lineWidth: 0.8
         },
         
-        // Default row styling
+        // Default row styling with white background
         rowStyles: {
-          fillColor: this.colors.white
+          fillColor: this.colors.white,
+          lineColor: this.colors.primary,
+          lineWidth: 0.8
         },
         
-        // Clean table borders
-        tableLineColor: this.colors.tableBorder,
-        tableLineWidth: 0.3,
+        // Clean table borders with dark green lines
+        tableLineColor: this.colors.primary,
+        tableLineWidth: 0.8,
         
         // Enhanced table appearance
         theme: 'grid',
         
         // Custom drawing hooks for enhanced styling
         didDrawCell: (data) => {
-          // Add subtle shadow effect to headers
+          // Add subtle shadow effect to headers with dark green
           if (data.section === 'head') {
-            this.doc.setDrawColor(200, 200, 200);
-            this.doc.setLineWidth(0.1);
+            this.doc.setDrawColor(...this.colors.primary);
+            this.doc.setLineWidth(0.8);
             this.doc.line(
               data.cell.x, 
               data.cell.y + data.cell.height, 
               data.cell.x + data.cell.width, 
-              data.cell.y + data.cell.height + 0.5
+              data.cell.y + data.cell.height
             );
           }
         },
@@ -404,9 +410,9 @@ class PDFReportGenerator {
         this.doc.roundedRect(20, this.yPosition - 2, this.pageWidth - 40, rowHeight, 1, 1, 'F');
       }
       
-      // Subtle row border
-      this.doc.setDrawColor(...this.colors.tableBorder);
-      this.doc.setLineWidth(0.1);
+      // Subtle row border with dark green
+      this.doc.setDrawColor(...this.colors.primary);
+      this.doc.setLineWidth(0.8);
       this.doc.roundedRect(20, this.yPosition - 2, this.pageWidth - 40, rowHeight, 1, 1, 'D');
       
       row.forEach((cell, colIndex) => {
