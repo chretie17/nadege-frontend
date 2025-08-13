@@ -2,6 +2,7 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import logoImage from '../assets/logo.png';
+import logoImage2 from '../assets/logo2.png'; // Second logo
 
 class PDFReportGenerator {
   constructor() {
@@ -26,9 +27,9 @@ class PDFReportGenerator {
     };
   }
 
-  // Initialize PDF document
+  // Initialize PDF document in landscape mode
   initializePDF() {
-    this.doc = new jsPDF('p', 'mm', 'a4');
+    this.doc = new jsPDF('l', 'mm', 'a4'); // 'l' for landscape
     this.pageWidth = this.doc.internal.pageSize.getWidth();
     this.pageHeight = this.doc.internal.pageSize.getHeight();
     this.yPosition = 20;
@@ -67,32 +68,41 @@ class PDFReportGenerator {
     });
   }
 
-  // Add clean header with logo
+  // Add clean header with two logos and big title
   async addHeader(reportName) {
-    // Try to load the main logo
+    // Try to load the first logo (left side)
     try {
-      const base64Logo = await this.loadImageAsBase64(logoImage);
-      this.doc.addImage(base64Logo, 'JPEG', 15, 15, 30, 30);
+      const base64Logo1 = await this.loadImageAsBase64(logoImage);
+      this.doc.addImage(base64Logo1, 'JPEG', 20, 15, 35, 35);
     } catch (error) {
-      console.warn('Logo loading failed, using fallback:', error);
-      this.addFallbackLogo(15, 15, 30, 30);
+      console.warn('Logo 1 loading failed, using fallback:', error);
+      this.addFallbackLogo(20, 15, 35, 35);
+    }
+
+    // Try to load the second logo (right side)
+    try {
+      const base64Logo2 = await this.loadImageAsBase64(logoImage2);
+      this.doc.addImage(base64Logo2, 'JPEG', this.pageWidth - 55, 15, 35, 35);
+    } catch (error) {
+      console.warn('Logo 2 loading failed, using fallback:', error);
+      this.addFallbackLogo(this.pageWidth - 55, 15, 35, 35);
     }
     
-    // Main title - centered
+    // Main title - large and centered
     this.doc.setTextColor(...this.colors.text);
-    this.doc.setFontSize(20);
+    this.doc.setFontSize(24);
     this.doc.setFont('helvetica', 'bold');
     const titleWidth = this.doc.getTextWidth(reportName.toUpperCase());
-    this.doc.text(reportName.toUpperCase(), (this.pageWidth - titleWidth) / 2, 25);
+    this.doc.text(reportName.toUpperCase(), (this.pageWidth - titleWidth) / 2, 30);
     
     // Subtitle - centered
-    this.doc.setFontSize(16);
+    this.doc.setFontSize(18);
     this.doc.setFont('helvetica', 'normal');
     const subtitleWidth = this.doc.getTextWidth('MedConnect Report');
-    this.doc.text('MedConnect Report', (this.pageWidth - subtitleWidth) / 2, 35);
+    this.doc.text('MedConnect Report', (this.pageWidth - subtitleWidth) / 2, 45);
     
     // Reset for body content
-    this.yPosition = 60;
+    this.yPosition = 70;
   }
 
   // Fallback logo if image fails to load
@@ -139,7 +149,7 @@ class PDFReportGenerator {
     this.yPosition += 15;
   }
 
-  // Enhanced table with professional styling
+  // Enhanced table with clean styling (no background colors)
   addTable(title, headers, rows, description = '') {
     if (!title || !headers || !Array.isArray(headers)) {
       console.warn('Invalid table parameters:', { title, headers, rows });
@@ -180,69 +190,55 @@ class PDFReportGenerator {
         tableWidth: 'auto',
         columnStyles: this.generateColumnStyles(headers.length, columnWidths),
         
-        // Enhanced styling
+        // Clean styling - no background colors, just borders
         styles: {
-          fontSize: 9,
+          fontSize: 11,
           cellPadding: { top: 8, right: 6, bottom: 8, left: 6 },
           font: 'helvetica',
           textColor: this.colors.text,
-          lineColor: this.colors.primary,
-          lineWidth: 0.8,
+          lineColor: this.colors.text,
+          lineWidth: 0.5,
           overflow: 'linebreak',
           cellWidth: 'wrap',
           valign: 'middle',
-          minCellHeight: 12
+          minCellHeight: 12,
+          fillColor: this.colors.white
         },
         
-        // Professional header styling with dark green background
+        // Clean header styling - white background with borders only
         headStyles: {
-          fillColor: this.colors.primary,
-          textColor: this.colors.white,
+          fillColor: this.colors.white,
+          textColor: this.colors.text,
           fontStyle: 'bold',
-          fontSize: 10,
+          fontSize: 12,
           cellPadding: { top: 10, right: 6, bottom: 10, left: 6 },
           halign: 'center',
           valign: 'middle',
           minCellHeight: 15,
-          lineColor: this.colors.primary,
-          lineWidth: 0.8
+          lineColor: this.colors.text,
+          lineWidth: 0.5
         },
         
-        // Clean alternating rows with white background
+        // No alternating row colors - all white
         alternateRowStyles: {
           fillColor: this.colors.white,
-          lineColor: this.colors.primary,
-          lineWidth: 0.8
+          lineColor: this.colors.text,
+          lineWidth: 0.5
         },
         
-        // Default row styling with white background
+        // Default row styling - white background
         rowStyles: {
           fillColor: this.colors.white,
-          lineColor: this.colors.primary,
-          lineWidth: 0.8
+          lineColor: this.colors.text,
+          lineWidth: 0.5
         },
         
-        // Clean table borders with dark green lines
-        tableLineColor: this.colors.primary,
-        tableLineWidth: 0.8,
+        // Clean table borders
+        tableLineColor: this.colors.text,
+        tableLineWidth: 0.5,
         
-        // Enhanced table appearance
+        // Clean table appearance
         theme: 'grid',
-        
-        // Custom drawing hooks for enhanced styling
-        didDrawCell: (data) => {
-          // Add subtle shadow effect to headers with dark green
-          if (data.section === 'head') {
-            this.doc.setDrawColor(...this.colors.primary);
-            this.doc.setLineWidth(0.8);
-            this.doc.line(
-              data.cell.x, 
-              data.cell.y + data.cell.height, 
-              data.cell.x + data.cell.width, 
-              data.cell.y + data.cell.height
-            );
-          }
-        },
         
         // Better page break handling
         showHead: 'everyPage',
@@ -368,32 +364,27 @@ class PDFReportGenerator {
     const rowHeight = 14;
     const colWidth = (this.pageWidth - 40) / headers.length;
     
-    // Enhanced header with gradient effect
-    this.doc.setFillColor(...this.colors.tableHeader);
-    this.doc.setDrawColor(...this.colors.tableBorder);
-    this.doc.setLineWidth(0.3);
-    this.doc.roundedRect(20, this.yPosition - 4, this.pageWidth - 40, rowHeight, 2, 2, 'FD');
+    // Clean header - white background with borders only
+    this.doc.setFillColor(...this.colors.white);
+    this.doc.setDrawColor(...this.colors.text);
+    this.doc.setLineWidth(0.5);
+    this.doc.rect(20, this.yPosition, this.pageWidth - 40, rowHeight, 'FD');
     
-    // Header shadow
-    this.doc.setFillColor(200, 200, 200);
-    this.doc.roundedRect(20, this.yPosition - 4 + rowHeight, this.pageWidth - 40, 1, 0, 0, 'F');
-    
-    this.doc.setTextColor(...this.colors.white);
-    this.doc.setFontSize(10);
+    this.doc.setTextColor(...this.colors.text);
+    this.doc.setFontSize(12);
     this.doc.setFont('helvetica', 'bold');
     
     headers.forEach((header, index) => {
       const headerText = header.length > 18 ? header.substring(0, 15) + '...' : header;
       const textWidth = this.doc.getTextWidth(headerText);
-      this.doc.text(headerText, 25 + (index * colWidth) + (colWidth - textWidth) / 2, this.yPosition + 5);
+      this.doc.text(headerText, 25 + (index * colWidth) + (colWidth - textWidth) / 2, this.yPosition + 9);
     });
     
-    this.yPosition += rowHeight + 3;
+    this.yPosition += rowHeight;
     
-    // Enhanced data rows
-    this.doc.setTextColor(...this.colors.text);
+    // Clean data rows - white background only
     this.doc.setFont('helvetica', 'normal');
-    this.doc.setFontSize(9);
+    this.doc.setFontSize(10);
     
     rows.forEach((row, rowIndex) => {
       if (this.yPosition + rowHeight > this.pageHeight - 30) {
@@ -401,19 +392,14 @@ class PDFReportGenerator {
         this.yPosition = 20;
       }
       
-      // Alternating row colors with rounded corners for better visual separation
-      if (rowIndex % 2 === 1) {
-        this.doc.setFillColor(...this.colors.tableAltRow);
-        this.doc.roundedRect(20, this.yPosition - 2, this.pageWidth - 40, rowHeight, 1, 1, 'F');
-      } else {
-        this.doc.setFillColor(...this.colors.white);
-        this.doc.roundedRect(20, this.yPosition - 2, this.pageWidth - 40, rowHeight, 1, 1, 'F');
-      }
+      // White background for all rows
+      this.doc.setFillColor(...this.colors.white);
+      this.doc.rect(20, this.yPosition, this.pageWidth - 40, rowHeight, 'F');
       
-      // Subtle row border with dark green
-      this.doc.setDrawColor(...this.colors.primary);
-      this.doc.setLineWidth(0.8);
-      this.doc.roundedRect(20, this.yPosition - 2, this.pageWidth - 40, rowHeight, 1, 1, 'D');
+      // Row border
+      this.doc.setDrawColor(...this.colors.text);
+      this.doc.setLineWidth(0.5);
+      this.doc.rect(20, this.yPosition, this.pageWidth - 40, rowHeight, 'D');
       
       row.forEach((cell, colIndex) => {
         const cleanCell = cell.toString().replace(/<[^>]*>/g, '');
@@ -421,11 +407,26 @@ class PDFReportGenerator {
         const textWidth = this.doc.getTextWidth(truncatedCell);
         const xPos = 25 + (colIndex * colWidth) + (colWidth - textWidth) / 2;
         
-        this.doc.text(truncatedCell, xPos, this.yPosition + 7);
+        this.doc.text(truncatedCell, xPos, this.yPosition + 9);
       });
       
       this.yPosition += rowHeight;
     });
+    
+    this.yPosition += 20;
+  }
+
+  // Add simple metadata text under table (no background)
+  addSimpleMetadata(downloadedBy, downloadedOn) {
+    // Add some space
+    this.yPosition += 10;
+    
+    // Simple text - no background or colors
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.setTextColor(...this.colors.text);
+    
+    this.doc.text(`Downloaded by: ${downloadedBy} | On: ${downloadedOn}`, 20, this.yPosition);
     
     this.yPosition += 20;
   }
@@ -552,6 +553,9 @@ class PDFReportGenerator {
       this.addTable('Doctor Profile Completeness Analysis', doctorHeaders, doctorRows,
         'Analysis of doctor profile completeness based on required information fields.');
     }
+
+    // Add simple metadata at the end
+    this.addSimpleMetadata('Admin User', new Date().toLocaleString());
   }
 
   // Generate Appointments Analytics Report
@@ -584,6 +588,9 @@ class PDFReportGenerator {
       this.addTable('Appointments by Medical Specialization', specHeaders, specRows,
         'Distribution of appointments across different medical specializations.');
     }
+
+    // Add simple metadata at the end
+    this.addSimpleMetadata('Admin User', new Date().toLocaleString());
   }
 
   // Generate Doctor Availability Report
@@ -621,6 +628,9 @@ class PDFReportGenerator {
       this.addTable('Weekly Availability Pattern', dayHeaders, dayRows,
         'Weekly availability patterns showing slot distribution across different days.');
     }
+
+    // Add simple metadata at the end
+    this.addSimpleMetadata('Admin User', new Date().toLocaleString());
   }
 
   // Generate Community Engagement Report
@@ -652,6 +662,9 @@ class PDFReportGenerator {
       this.addTable('Success Stories Statistics', storyHeaders, storyRows,
         'Overview of success stories in the community platform by approval status.');
     }
+
+    // Add simple metadata at the end
+    this.addSimpleMetadata('Admin User', new Date().toLocaleString());
   }
 
   // Main method to generate PDF report
@@ -669,7 +682,7 @@ class PDFReportGenerator {
       
       const reportName = reportNames[reportType] || 'HEALTHCARE SYSTEM';
       
-      // Add header
+      // Add header with two logos
       await this.addHeader(reportName);
       
       // Generate content based on report type
@@ -693,9 +706,6 @@ class PDFReportGenerator {
             this.doc.text('Invalid report type specified.', 20, this.yPosition);
         }
       }
-      
-      // Add configuration section at bottom
-      this.addReportConfiguration(startDate, endDate, search, reportName);
       
       // Add footers to all pages
       this.addFooters();
